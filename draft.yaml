@@ -1,0 +1,283 @@
+models:
+  User:
+    id: integer primary auto_increment
+    name: string 
+    username: string unique
+    email: string unique
+    password: string 
+    birth_date: date
+    register_date: timestamp 
+    bio: text nullable
+    email_verified_at: timestamp nullable
+    available_pines: integer default:3
+    profile_picture: text nullable
+    accumulated_points: integer default:0
+    relationships:
+      hasMany: Post, Comment, Reaction, UserFollower, UserFollowing, Purchase
+
+  Media:
+    id: integer primary auto_increment
+    user_id: integer foreign:User nullable:false
+    type: enum:photo,video
+    url: text
+    upload_date: timestamp 
+    relationships:
+      belongsTo: User
+      hasMany: Post
+
+  UserFollower:
+    id: integer primary auto_increment
+    user_id: integer foreign:User nullable:false
+    follower_id: integer foreign:User nullable:false
+    belongsTo: User, foreignKey:user_id
+
+  UserFollowing:
+    id: integer primary auto_increment
+    user_id: integer foreign:User nullable:false
+    following_id: integer foreign:User nullable:false
+    belongsTo: User, foreignKey:user_id
+
+  Album:
+    id: integer primary auto_increment
+    user_id: integer foreign:User nullable:false
+    title: string nullable
+    description: text nullable
+    relationships:
+      belongsTo: User
+      hasMany: Photo
+
+  Post:
+    id: integer primary auto_increment
+    user_id: integer foreign:User nullable:false
+    title: string nullable
+    description: text nullable
+    publish_date: timestamp
+    life_time: integer default:24
+    permanent: boolean default:false
+    media_id: integer foreign:Media
+    relationships:
+      belongsTo: User, Media
+      hasMany: Comment, Reaction, InteractionHistory
+
+  Comment:
+    id: integer primary auto_increment
+    user_id: integer foreign:User nullable:false
+    text: text nullable:false
+    comment_date: timestamp
+    relationships:
+      belongsTo: User
+      morphTo: commentable
+      hasMany: Reaction
+
+  Reaction:
+    id: integer primary auto_increment
+    user_id: integer foreign:User nullable:false
+    relationships:
+      belongsTo: User
+      morphTo: reactable
+
+  InteractionHistory:
+    id: integer primary auto_increment
+    user_id: integer foreign:User nullable:false
+    post_id: integer foreign:Post nullable:false
+    interaction_type: enum:reaction,comment,share
+    interaction_date: timestamp
+    relationships:
+      belongsTo: User, Post
+
+
+  Story:
+    id: integer primary auto_increment
+    user_id: integer foreign:User nullable:false
+    content: text nullable
+    publish_date: timestamp
+    expiration_date: timestamp nullable:false
+    relationships:
+      belongsTo: User
+      hasMany: View, Reaction
+
+  View:
+    id: integer primary auto_increment
+    user_id: integer foreign:User nullable:false
+    story_id: integer foreign:Story nullable:false
+    view_date: timestamp
+    relationships:
+      belongsTo: User, Story
+
+  Tag:
+    id: integer primary auto_increment
+    name: string nullable unique
+    relationships:
+      belongsToMany: Post
+
+  Hashtag:
+    id: integer primary auto_increment
+    name: string nullable unique
+    relationships:
+      belongsToMany: Post
+
+  PostTag:
+    post_id: integer foreign:Post
+    tag_id: integer foreign:Tag
+    relationships:
+      belongsTo: Post, Tag
+
+
+  PostHashtag:
+    post_id: integer foreign:Post
+    hashtag_id: integer foreign:Hashtag
+    relationships:
+      belongsTo: Post, Hashtag
+  
+  ShopItem:
+    id: integer primary auto_increment
+    name: string
+    description: text nullable
+    cost_in_points: integer
+    type: enum:time,pin
+    relationships:
+      hasMany: Purchase
+
+  Purchase:
+    id: integer primary auto_increment
+    user_id: integer foreign:User nullable:false
+    shop_item_id: integer foreign:ShopItem nullable:false
+    purchase_date: timestamp
+    relationships:
+      belongsTo: User, ShopItem
+
+  Message:
+    id: integer primary auto_increment
+    content: text nullable
+    sent_date: timestamp
+
+  SentMessage:
+    id: integer primary auto_increment
+    sender_id: integer foreign:User
+    message_id: integer foreign:Message
+    relationships:
+      belongsTo: User, Message
+
+
+  ReceivedMessage:
+    id: integer primary auto_increment
+    receiver_id: integer foreign:User
+    message_id: integer foreign:Message
+    relationships:
+      belongsTo: User, Message
+
+  Notification:
+    id: integer primary auto_increment
+    user_id: integer foreign:User nullable:false
+    type: enum:reaction,comment,follow,message
+    related_id: integer nullable:false
+    read: boolean default:false
+    notification_date: timestamp
+    relationships:
+      belongsTo: User
+
+  Photo:
+    id: integer primary auto_increment
+    user_id: integer foreign:User nullable:false
+    album_id: integer foreign:Album nullable:true
+    url: text
+    title: string nullable
+    description: text nullable
+    upload_date: timestamp
+    relationships:
+      belongsTo: User, Album
+
+  Video:
+    id: integer primary auto_increment
+    user_id: integer foreign:User nullable:false
+    album_id: integer foreign:Album nullable:true
+    url: text
+    title: string nullable
+    description: text nullable
+    duration: integer
+    upload_date: timestamp
+    relationships:
+      belongsTo: User, Album
+
+
+controllers:
+  User:
+    resource: api
+    
+
+  UserFollower:
+    resource: api
+    
+
+  UserFollowing:
+    resource: api
+   
+
+  Post:
+    resource: api
+    
+
+  Media:
+    resource: api
+   
+
+  Comment:
+    resource: api
+    
+
+  Reaction:
+    resource: api
+    
+
+  InteractionHistory:
+    resource: api
+    
+
+  Story:
+    resource: api
+    
+
+  View:
+    resource: api
+    
+
+  Message:
+    resource: api
+    
+
+  Notification:
+    resource: api
+    
+
+  Album:
+    resource: api
+    
+
+  Photo:
+    resource: api
+    
+
+  Tag:
+    resource: api
+    
+
+  PostTag:
+    resource: api
+    
+
+  Hashtag:
+    resource: api
+   
+
+  PostHashtag:
+    resource: api
+    
+
+  ShopItem:
+    resource: api
+    
+
+  Purchase:
+    resource: api
+  
+

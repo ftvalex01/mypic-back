@@ -1,0 +1,218 @@
+created:
+    - app/Http/Controllers/UserController.php
+    - app/Http/Controllers/UserFollowerController.php
+    - app/Http/Controllers/UserFollowingController.php
+    - app/Http/Controllers/PostController.php
+    - app/Http/Controllers/MediaController.php
+    - app/Http/Controllers/CommentController.php
+    - app/Http/Controllers/ReactionController.php
+    - app/Http/Controllers/InteractionHistoryController.php
+    - app/Http/Controllers/StoryController.php
+    - app/Http/Controllers/ViewController.php
+    - app/Http/Controllers/MessageController.php
+    - app/Http/Controllers/NotificationController.php
+    - app/Http/Controllers/AlbumController.php
+    - app/Http/Controllers/PhotoController.php
+    - app/Http/Controllers/TagController.php
+    - app/Http/Controllers/PostTagController.php
+    - app/Http/Controllers/HashtagController.php
+    - app/Http/Controllers/PostHashtagController.php
+    - app/Http/Controllers/ShopItemController.php
+    - app/Http/Controllers/PurchaseController.php
+    - database/factories/UserFactory.php
+    - database/factories/MediaFactory.php
+    - database/factories/UserFollowerFactory.php
+    - database/factories/UserFollowingFactory.php
+    - database/factories/AlbumFactory.php
+    - database/factories/PostFactory.php
+    - database/factories/CommentFactory.php
+    - database/factories/ReactionFactory.php
+    - database/factories/InteractionHistoryFactory.php
+    - database/factories/StoryFactory.php
+    - database/factories/ViewFactory.php
+    - database/factories/TagFactory.php
+    - database/factories/HashtagFactory.php
+    - database/factories/PostTagFactory.php
+    - database/factories/PostHashtagFactory.php
+    - database/factories/ShopItemFactory.php
+    - database/factories/PurchaseFactory.php
+    - database/factories/MessageFactory.php
+    - database/factories/SentMessageFactory.php
+    - database/factories/ReceivedMessageFactory.php
+    - database/factories/NotificationFactory.php
+    - database/factories/PhotoFactory.php
+    - database/factories/VideoFactory.php
+    - database/migrations/2024_02_04_011237_create_users_table.php
+    - database/migrations/2024_02_04_011238_create_media_table.php
+    - database/migrations/2024_02_04_011239_create_user_followers_table.php
+    - database/migrations/2024_02_04_011240_create_user_followings_table.php
+    - database/migrations/2024_02_04_011241_create_albums_table.php
+    - database/migrations/2024_02_04_011242_create_posts_table.php
+    - database/migrations/2024_02_04_011243_create_comments_table.php
+    - database/migrations/2024_02_04_011244_create_reactions_table.php
+    - database/migrations/2024_02_04_011245_create_interaction_histories_table.php
+    - database/migrations/2024_02_04_011246_create_stories_table.php
+    - database/migrations/2024_02_04_011247_create_views_table.php
+    - database/migrations/2024_02_04_011248_create_tags_table.php
+    - database/migrations/2024_02_04_011249_create_hashtags_table.php
+    - database/migrations/2024_02_04_011250_create_post_tags_table.php
+    - database/migrations/2024_02_04_011251_create_post_hashtags_table.php
+    - database/migrations/2024_02_04_011252_create_shop_items_table.php
+    - database/migrations/2024_02_04_011253_create_purchases_table.php
+    - database/migrations/2024_02_04_011254_create_messages_table.php
+    - database/migrations/2024_02_04_011255_create_sent_messages_table.php
+    - database/migrations/2024_02_04_011256_create_received_messages_table.php
+    - database/migrations/2024_02_04_011257_create_notifications_table.php
+    - database/migrations/2024_02_04_011258_create_photos_table.php
+    - database/migrations/2024_02_04_011259_create_videos_table.php
+    - database/migrations/2024_02_04_011300_create_post_tag_table.php
+    - database/migrations/2024_02_04_011301_create_hashtag_post_table.php
+    - app/Models/User.php
+    - app/Models/Media.php
+    - app/Models/UserFollower.php
+    - app/Models/UserFollowing.php
+    - app/Models/Album.php
+    - app/Models/Post.php
+    - app/Models/Comment.php
+    - app/Models/Reaction.php
+    - app/Models/InteractionHistory.php
+    - app/Models/Story.php
+    - app/Models/View.php
+    - app/Models/Tag.php
+    - app/Models/Hashtag.php
+    - app/Models/PostTag.php
+    - app/Models/PostHashtag.php
+    - app/Models/ShopItem.php
+    - app/Models/Purchase.php
+    - app/Models/Message.php
+    - app/Models/SentMessage.php
+    - app/Models/ReceivedMessage.php
+    - app/Models/Notification.php
+    - app/Models/Photo.php
+    - app/Models/Video.php
+    - tests/Feature/Http/Controllers/UserControllerTest.php
+    - tests/Feature/Http/Controllers/UserFollowerControllerTest.php
+    - tests/Feature/Http/Controllers/UserFollowingControllerTest.php
+    - tests/Feature/Http/Controllers/PostControllerTest.php
+    - tests/Feature/Http/Controllers/MediaControllerTest.php
+    - tests/Feature/Http/Controllers/CommentControllerTest.php
+    - tests/Feature/Http/Controllers/ReactionControllerTest.php
+    - tests/Feature/Http/Controllers/InteractionHistoryControllerTest.php
+    - tests/Feature/Http/Controllers/StoryControllerTest.php
+    - tests/Feature/Http/Controllers/ViewControllerTest.php
+    - tests/Feature/Http/Controllers/MessageControllerTest.php
+    - tests/Feature/Http/Controllers/NotificationControllerTest.php
+    - tests/Feature/Http/Controllers/AlbumControllerTest.php
+    - tests/Feature/Http/Controllers/PhotoControllerTest.php
+    - tests/Feature/Http/Controllers/TagControllerTest.php
+    - tests/Feature/Http/Controllers/PostTagControllerTest.php
+    - tests/Feature/Http/Controllers/HashtagControllerTest.php
+    - tests/Feature/Http/Controllers/PostHashtagControllerTest.php
+    - tests/Feature/Http/Controllers/ShopItemControllerTest.php
+    - tests/Feature/Http/Controllers/PurchaseControllerTest.php
+    - app/Http/Requests/UserStoreRequest.php
+    - app/Http/Requests/UserUpdateRequest.php
+    - app/Http/Requests/UserFollowerStoreRequest.php
+    - app/Http/Requests/UserFollowerUpdateRequest.php
+    - app/Http/Requests/UserFollowingStoreRequest.php
+    - app/Http/Requests/UserFollowingUpdateRequest.php
+    - app/Http/Requests/PostStoreRequest.php
+    - app/Http/Requests/PostUpdateRequest.php
+    - app/Http/Requests/MediumStoreRequest.php
+    - app/Http/Requests/MediumUpdateRequest.php
+    - app/Http/Requests/CommentStoreRequest.php
+    - app/Http/Requests/CommentUpdateRequest.php
+    - app/Http/Requests/ReactionStoreRequest.php
+    - app/Http/Requests/ReactionUpdateRequest.php
+    - app/Http/Requests/InteractionHistoryStoreRequest.php
+    - app/Http/Requests/InteractionHistoryUpdateRequest.php
+    - app/Http/Requests/StoryStoreRequest.php
+    - app/Http/Requests/StoryUpdateRequest.php
+    - app/Http/Requests/ViewStoreRequest.php
+    - app/Http/Requests/ViewUpdateRequest.php
+    - app/Http/Requests/MessageStoreRequest.php
+    - app/Http/Requests/MessageUpdateRequest.php
+    - app/Http/Requests/NotificationStoreRequest.php
+    - app/Http/Requests/NotificationUpdateRequest.php
+    - app/Http/Requests/AlbumStoreRequest.php
+    - app/Http/Requests/AlbumUpdateRequest.php
+    - app/Http/Requests/PhotoStoreRequest.php
+    - app/Http/Requests/PhotoUpdateRequest.php
+    - app/Http/Requests/TagStoreRequest.php
+    - app/Http/Requests/TagUpdateRequest.php
+    - app/Http/Requests/PostTagStoreRequest.php
+    - app/Http/Requests/PostTagUpdateRequest.php
+    - app/Http/Requests/HashtagStoreRequest.php
+    - app/Http/Requests/HashtagUpdateRequest.php
+    - app/Http/Requests/PostHashtagStoreRequest.php
+    - app/Http/Requests/PostHashtagUpdateRequest.php
+    - app/Http/Requests/ShopItemStoreRequest.php
+    - app/Http/Requests/ShopItemUpdateRequest.php
+    - app/Http/Requests/PurchaseStoreRequest.php
+    - app/Http/Requests/PurchaseUpdateRequest.php
+    - app/Http/Resources/UserCollection.php
+    - app/Http/Resources/UserResource.php
+    - app/Http/Resources/UserFollowerCollection.php
+    - app/Http/Resources/UserFollowerResource.php
+    - app/Http/Resources/UserFollowingCollection.php
+    - app/Http/Resources/UserFollowingResource.php
+    - app/Http/Resources/PostCollection.php
+    - app/Http/Resources/PostResource.php
+    - app/Http/Resources/MediumCollection.php
+    - app/Http/Resources/MediumResource.php
+    - app/Http/Resources/CommentCollection.php
+    - app/Http/Resources/CommentResource.php
+    - app/Http/Resources/ReactionCollection.php
+    - app/Http/Resources/ReactionResource.php
+    - app/Http/Resources/InteractionHistoryCollection.php
+    - app/Http/Resources/InteractionHistoryResource.php
+    - app/Http/Resources/StoryCollection.php
+    - app/Http/Resources/StoryResource.php
+    - app/Http/Resources/ViewCollection.php
+    - app/Http/Resources/ViewResource.php
+    - app/Http/Resources/MessageCollection.php
+    - app/Http/Resources/MessageResource.php
+    - app/Http/Resources/NotificationCollection.php
+    - app/Http/Resources/NotificationResource.php
+    - app/Http/Resources/AlbumCollection.php
+    - app/Http/Resources/AlbumResource.php
+    - app/Http/Resources/PhotoCollection.php
+    - app/Http/Resources/PhotoResource.php
+    - app/Http/Resources/TagCollection.php
+    - app/Http/Resources/TagResource.php
+    - app/Http/Resources/PostTagCollection.php
+    - app/Http/Resources/PostTagResource.php
+    - app/Http/Resources/HashtagCollection.php
+    - app/Http/Resources/HashtagResource.php
+    - app/Http/Resources/PostHashtagCollection.php
+    - app/Http/Resources/PostHashtagResource.php
+    - app/Http/Resources/ShopItemCollection.php
+    - app/Http/Resources/ShopItemResource.php
+    - app/Http/Resources/PurchaseCollection.php
+    - app/Http/Resources/PurchaseResource.php
+updated:
+    - routes/api.php
+models:
+    User: { id: 'integer primary auto_increment', name: string, username: 'string unique', email: 'string unique', password: string, birth_date: date, register_date: timestamp, bio: 'text nullable', email_verified_at: 'timestamp nullable', available_pines: 'integer default:3', profile_picture: 'text nullable', accumulated_points: 'integer default:0', relationships: { hasMany: 'Post, Comment, Reaction, UserFollower, UserFollowing, Purchase' } }
+    Media: { id: 'integer primary auto_increment', user_id: 'integer foreign:User nullable:false', type: 'enum:photo,video', url: text, upload_date: timestamp, relationships: { belongsTo: User, hasMany: Post } }
+    UserFollower: { id: 'integer primary auto_increment', user_id: 'integer foreign:User nullable:false', follower_id: 'integer foreign:User nullable:false', belongsTo: 'User, foreignKey:user_id' }
+    UserFollowing: { id: 'integer primary auto_increment', user_id: 'integer foreign:User nullable:false', following_id: 'integer foreign:User nullable:false', belongsTo: 'User, foreignKey:user_id' }
+    Album: { id: 'integer primary auto_increment', user_id: 'integer foreign:User nullable:false', title: 'string nullable', description: 'text nullable', relationships: { belongsTo: User, hasMany: Photo } }
+    Post: { id: 'integer primary auto_increment', user_id: 'integer foreign:User nullable:false', title: 'string nullable', description: 'text nullable', publish_date: timestamp, life_time: 'integer default:24', permanent: 'boolean default:false', media_id: 'integer foreign:Media', relationships: { belongsTo: 'User, Media', hasMany: 'Comment, Reaction, InteractionHistory' } }
+    Comment: { id: 'integer primary auto_increment', user_id: 'integer foreign:User nullable:false', text: 'text nullable:false', comment_date: timestamp, relationships: { belongsTo: User, morphTo: commentable, hasMany: Reaction } }
+    Reaction: { id: 'integer primary auto_increment', user_id: 'integer foreign:User nullable:false', relationships: { belongsTo: User, morphTo: reactable } }
+    InteractionHistory: { id: 'integer primary auto_increment', user_id: 'integer foreign:User nullable:false', post_id: 'integer foreign:Post nullable:false', interaction_type: 'enum:reaction,comment,share', interaction_date: timestamp, relationships: { belongsTo: 'User, Post' } }
+    Story: { id: 'integer primary auto_increment', user_id: 'integer foreign:User nullable:false', content: 'text nullable', publish_date: timestamp, expiration_date: 'timestamp nullable:false', relationships: { belongsTo: User, hasMany: 'View, Reaction' } }
+    View: { id: 'integer primary auto_increment', user_id: 'integer foreign:User nullable:false', story_id: 'integer foreign:Story nullable:false', view_date: timestamp, relationships: { belongsTo: 'User, Story' } }
+    Tag: { id: 'integer primary auto_increment', name: 'string nullable unique', relationships: { belongsToMany: Post } }
+    Hashtag: { id: 'integer primary auto_increment', name: 'string nullable unique', relationships: { belongsToMany: Post } }
+    PostTag: { post_id: 'integer foreign:Post', tag_id: 'integer foreign:Tag', relationships: { belongsTo: 'Post, Tag' } }
+    PostHashtag: { post_id: 'integer foreign:Post', hashtag_id: 'integer foreign:Hashtag', relationships: { belongsTo: 'Post, Hashtag' } }
+    ShopItem: { id: 'integer primary auto_increment', name: string, description: 'text nullable', cost_in_points: integer, type: 'enum:time,pin', relationships: { hasMany: Purchase } }
+    Purchase: { id: 'integer primary auto_increment', user_id: 'integer foreign:User nullable:false', shop_item_id: 'integer foreign:ShopItem nullable:false', purchase_date: timestamp, relationships: { belongsTo: 'User, ShopItem' } }
+    Message: { id: 'integer primary auto_increment', content: 'text nullable', sent_date: timestamp }
+    SentMessage: { id: 'integer primary auto_increment', sender_id: 'integer foreign:User', message_id: 'integer foreign:Message', relationships: { belongsTo: 'User, Message' } }
+    ReceivedMessage: { id: 'integer primary auto_increment', receiver_id: 'integer foreign:User', message_id: 'integer foreign:Message', relationships: { belongsTo: 'User, Message' } }
+    Notification: { id: 'integer primary auto_increment', user_id: 'integer foreign:User nullable:false', type: 'enum:reaction,comment,follow,message', related_id: 'integer nullable:false', read: 'boolean default:false', notification_date: timestamp, relationships: { belongsTo: User } }
+    Photo: { id: 'integer primary auto_increment', user_id: 'integer foreign:User nullable:false', album_id: 'integer foreign:Album nullable:true', url: text, title: 'string nullable', description: 'text nullable', upload_date: timestamp, relationships: { belongsTo: 'User, Album' } }
+    Video: { id: 'integer primary auto_increment', user_id: 'integer foreign:User nullable:false', album_id: 'integer foreign:Album nullable:true', url: text, title: 'string nullable', description: 'text nullable', duration: integer, upload_date: timestamp, relationships: { belongsTo: 'User, Album' } }
