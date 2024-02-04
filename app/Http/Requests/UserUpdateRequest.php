@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Password;
 
 class UserUpdateRequest extends FormRequest
 {
@@ -20,17 +21,13 @@ class UserUpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string'],
-            'username' => ['required', 'string', 'unique:users,username'],
-            'email' => ['required', 'email', 'unique:users,email'],
-            'password' => ['required', 'password'],
-            'birth_date' => ['required', 'date'],
-            'register_date' => ['required'],
+            'name' => ['sometimes', 'string'],
+            'password' => ['sometimes', 'confirmed', Password::defaults()],
+            'birth_date' => ['sometimes', 'date'],
             'bio' => ['nullable', 'string'],
-            'email_verified_at' => ['nullable'],
-            'available_pines' => ['required', 'integer'],
             'profile_picture' => ['nullable', 'string'],
-            'accumulated_points' => ['required', 'integer'],
+            'available_pines' => ['sometimes', 'integer'],
+            'accumulated_points' => ['sometimes', 'integer'],
         ];
     }
 }

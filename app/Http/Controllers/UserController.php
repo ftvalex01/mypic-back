@@ -31,8 +31,9 @@ class UserController extends Controller
         return new UserCollection($users);
     }
 
-    public function store(Request $request): Response
-    {
+    public function store(Request $request)
+{
+    try {
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'username' => ['required', 'string', 'max:255', 'unique:users'],
@@ -48,14 +49,21 @@ class UserController extends Controller
             'password' => Hash::make($request->password),
             'birth_date' => $request->birth_date,
             'register_date' => now(),
-
         ]);
+
         event(new Registered($user));
 
         Auth::login($user);
 
         return response()->noContent();
+    } catch (\Exception $e) {
+        // Log de errores y datos
+        Log::error('Error durante el registro: ' . $e->getMessage());
+        Log::info('Datos recibidos:', $request->all());
+
+        return response()->json(['error' => 'An unexpected error occurred during registration. Please try again.'], 422);
     }
+}
 
     public function show(Request $request, User $user)
     {

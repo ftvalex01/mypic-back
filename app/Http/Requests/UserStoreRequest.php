@@ -32,5 +32,6 @@ class UserStoreRequest extends FormRequest
             'profile_picture' => ['nullable', 'string'],
             'accumulated_points' => ['required', 'integer'],
         ];
+        
     }
 }
