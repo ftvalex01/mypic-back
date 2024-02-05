@@ -28,6 +28,11 @@ Route::post('register', [UserController::class, 'store']);
 Route::post('/forgot-password', [UserController::class, 'restore'])->middleware('guest','throttle:6,1');
 Route::post('/reset-password', [UserController::class, 'newpassword'])->middleware('guest');
 
+Route::apiResource('post', App\Http\Controllers\PostController::class);
+
+Route::apiResource('media', App\Http\Controllers\MediaController::class);
+
+
 // Ruta para solicitar reenvío de correo de verificación
 Route::post('/email/verification-notification', [EmailVerificationNotificationController::class, 'store'])
      ->middleware(['auth:sanctum', 'throttle:6,1'])
@@ -49,9 +54,7 @@ Route::apiResource('user-follower', App\Http\Controllers\UserFollowerController:
 
 Route::apiResource('user-following', App\Http\Controllers\UserFollowingController::class);
 
-Route::apiResource('post', App\Http\Controllers\PostController::class);
 
-Route::apiResource('media', App\Http\Controllers\MediaController::class);
 
 Route::apiResource('comment', App\Http\Controllers\CommentController::class);
 

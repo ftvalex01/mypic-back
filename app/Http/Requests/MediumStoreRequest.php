@@ -23,7 +23,6 @@ class MediumStoreRequest extends FormRequest
             'user_id' => ['required', 'integer'],
             'type' => ['required', 'in:photo,video'],
             'url' => ['required', 'string'],
-            'upload_date' => ['required'],
         ];
     }
 }

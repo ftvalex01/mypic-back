@@ -21,7 +21,7 @@ class PostResource extends JsonResource
             'life_time' => $this->life_time,
             'permanent' => $this->permanent,
             'media_id' => $this->media_id,
-            'media' => MediaResource::make($this->whenLoaded('media')),
+            'media' => MediumResource::make($this->whenLoaded('media')),
             'interactionHistories' => InteractionHistoryCollection::make($this->whenLoaded('interactionHistories')),
         ];
     }

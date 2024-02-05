@@ -12,26 +12,26 @@ use Illuminate\Http\Response;
 
 class PostController extends Controller
 {
-    public function index(Request $request): Response
+    public function index(Request $request)
     {
         $posts = Post::all();
 
         return new PostCollection($posts);
     }
 
-    public function store(PostStoreRequest $request): Response
+    public function store(PostStoreRequest $request)
     {
         $post = Post::create($request->validated());
 
         return new PostResource($post);
     }
 
-    public function show(Request $request, Post $post): Response
+    public function show(Request $request, Post $post)
     {
         return new PostResource($post);
     }
 
-    public function update(PostUpdateRequest $request, Post $post): Response
+    public function update(PostUpdateRequest $request, Post $post)
     {
         $post->update($request->validated());
 
