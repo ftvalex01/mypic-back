@@ -31,6 +31,17 @@ class UserController extends Controller
         return new UserCollection($users);
     }
 
+    public function getUserByUsername($username)
+    {
+        $user = User::where('username', $username)->first();
+
+        if (!$user) {
+            return response()->json(['message' => 'User not found'], Response::HTTP_NOT_FOUND);
+        }
+
+        return response()->json($user);
+    }
+
     public function store(Request $request)
     {
         try {

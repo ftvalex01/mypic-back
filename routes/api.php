@@ -19,13 +19,13 @@ use Illuminate\Http\Request;
 */
 
 Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/user', [UserController::class, 'profile']);
-    Route::post('/logout', [UserController::class, 'destroy']);
+     Route::get('/user', [UserController::class, 'profile']);
+     Route::post('/logout', [UserController::class, 'destroy']);
 });
 Route::post('login', [UserController::class, 'login']);
 Route::post('register', [UserController::class, 'store']);
 
-Route::post('/forgot-password', [UserController::class, 'restore'])->middleware('guest','throttle:6,1');
+Route::post('/forgot-password', [UserController::class, 'restore'])->middleware('guest', 'throttle:6,1');
 Route::post('/reset-password', [UserController::class, 'newpassword'])->middleware('guest');
 
 Route::apiResource('post', App\Http\Controllers\PostController::class);
@@ -37,7 +37,7 @@ Route::apiResource('media', App\Http\Controllers\MediaController::class);
 Route::post('/email/verification-notification', [EmailVerificationNotificationController::class, 'store'])
      ->middleware(['auth:sanctum', 'throttle:6,1'])
      ->name('verification.send');
-   
+
 // Ruta para verificar el correo electrónico
 Route::get('/email/verify/{id}/{hash}', [VerifyEmailController::class, '__invoke'])
      ->middleware(['auth:sanctum', 'signed'])
@@ -48,6 +48,10 @@ Route::get('/email/verify/{id}/{hash}', [VerifyEmailController::class, '__invoke
 
 Route::middleware('auth:sanctum')->post('/user/{user}', [UserController::class, 'update']);
 
+Route::middleware('auth:sanctum')->get('/user/{username}', [UserController::class, 'getUserByUsername']);
+
+
+Route::middleware('auth:sanctum')->get('/users', [UserController::class, 'index']);
 
 
 Route::apiResource('user-follower', App\Http\Controllers\UserFollowerController::class);
