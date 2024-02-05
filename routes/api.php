@@ -49,18 +49,16 @@ Route::get('/email/verify/{id}/{hash}', [VerifyEmailController::class, '__invoke
 
 Route::middleware('auth:sanctum')->post('/user/{user}', [UserController::class, 'update']);
 
-Route::middleware('auth:sanctum')->get('/user/{username}', [UserController::class, 'getUserByUsername']);
-
-
-Route::middleware('auth:sanctum')->get('/users', [UserController::class, 'index']);
-
 Route::middleware('auth:sanctum')->get('/user/{user}/images', [MediaController::class, 'getUserImages']);
 
 Route::apiResource('user-follower', App\Http\Controllers\UserFollowerController::class);
 
 Route::apiResource('user-following', App\Http\Controllers\UserFollowingController::class);
 
+Route::middleware('auth:sanctum')->get('/user/{username}', [UserController::class, 'getUserByUsername']);
 
+
+Route::middleware('auth:sanctum')->get('/users', [UserController::class, 'index']);
 
 Route::apiResource('comment', App\Http\Controllers\CommentController::class);
 
