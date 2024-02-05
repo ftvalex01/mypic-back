@@ -21,7 +21,6 @@ class PostStoreRequest extends FormRequest
     {
         return [
             'user_id' => ['required', 'integer'],
-            'title' => ['nullable', 'string'],
             'description' => ['nullable', 'string'],
             'publish_date' => ['required'],
             'life_time' => ['required', 'integer'],

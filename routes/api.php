@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 use App\Http\Controllers\Auth\VerifyEmailController;
+use App\Http\Controllers\MediaController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
@@ -48,7 +49,7 @@ Route::get('/email/verify/{id}/{hash}', [VerifyEmailController::class, '__invoke
 
 Route::middleware('auth:sanctum')->post('/user/{user}', [UserController::class, 'update']);
 
-
+Route::middleware('auth:sanctum')->get('/user/{user}/images', [MediaController::class, 'getUserImages']);
 
 Route::apiResource('user-follower', App\Http\Controllers\UserFollowerController::class);
 

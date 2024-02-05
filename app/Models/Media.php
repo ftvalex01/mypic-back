@@ -37,8 +37,10 @@ class Media extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function posts(): HasMany
+
+
+    public function post(): BelongsTo
     {
-        return $this->hasMany(Post::class);
+        return $this->belongsTo(Post::class);
     }
 }
