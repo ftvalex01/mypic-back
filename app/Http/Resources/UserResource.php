@@ -22,15 +22,11 @@ class UserResource extends JsonResource
             'bio' => $this->bio,
             'email_verified_at' => $this->email_verified_at,
             'available_pines' => $this->available_pines,
-            'profile_picture' => $this->profile_picture,
+            'profile_picture' => $this->profile_picture ? asset('storage/'.$this->profile_picture) : null,
             'accumulated_points' => $this->accumulated_points,
             'purchases' => PurchaseCollection::make($this->whenLoaded('purchases')),
         ];
         
-    }
-    public function profile(Request $request)
-    {
-        return response()->json($request->user());
     }
     
 }

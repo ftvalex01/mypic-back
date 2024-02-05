@@ -32,38 +32,38 @@ class UserController extends Controller
     }
 
     public function store(Request $request)
-{
-    try {
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'username' => ['required', 'string', 'max:255', 'unique:users'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'birth_date' => ['required', 'date'],
-        ]);
+    {
+        try {
+            $request->validate([
+                'name' => ['required', 'string', 'max:255'],
+                'username' => ['required', 'string', 'max:255', 'unique:users'],
+                'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+                'password' => ['required', 'confirmed', Rules\Password::defaults()],
+                'birth_date' => ['required', 'date'],
+            ]);
 
-        $user = User::create([
-            'name' => $request->name,
-            'username' => $request->username,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'birth_date' => $request->birth_date,
-            'register_date' => now(),
-        ]);
+            $user = User::create([
+                'name' => $request->name,
+                'username' => $request->username,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+                'birth_date' => $request->birth_date,
+                'register_date' => now(),
+            ]);
 
-        event(new Registered($user));
+            event(new Registered($user));
 
-        Auth::login($user);
+            Auth::login($user);
 
-        return response()->noContent();
-    } catch (\Exception $e) {
-        // Log de errores y datos
-        Log::error('Error durante el registro: ' . $e->getMessage());
-        Log::info('Datos recibidos:', $request->all());
+            return response()->noContent();
+        } catch (\Exception $e) {
+            // Log de errores y datos
+            Log::error('Error durante el registro: ' . $e->getMessage());
+            Log::info('Datos recibidos:', $request->all());
 
-        return response()->json(['error' => 'An unexpected error occurred during registration. Please try again.'], 422);
+            return response()->json(['error' => 'An unexpected error occurred during registration. Please try again.'], 422);
+        }
     }
-}
 
     public function show(Request $request, User $user)
     {
@@ -72,8 +72,14 @@ class UserController extends Controller
 
     public function update(UserUpdateRequest $request, User $user)
     {
-        $user->update($request->validated());
 
+        Log::info('Datos del Request:', $request->all());
+        $user->update($request->validated());
+        if ($request->hasFile('profile_picture')) {
+            $path = $request->file('profile_picture')->store('profile_pictures', 'public');
+            $user->profile_picture = $path;
+            $user->save();
+        }
         return new UserResource($user);
     }
 
@@ -87,32 +93,29 @@ class UserController extends Controller
 
         return response()->noContent();
     }
+    /**
+     * Handle an incoming password reset link request.
+     *
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    public function restore(Request $request): JsonResponse
+    {
+        $request->validate([
+            'email' => ['required', 'email'],
+        ]);
 
+        $status = Password::sendResetLink(
+            $request->only('email')
+        );
 
-     /**
-    * Handle an incoming password reset link request.
-    *
-    * @throws \Illuminate\Validation\ValidationException
-    */
-   public function restore(Request $request): JsonResponse
-   {
-       $request->validate([
-           'email' => ['required', 'email'],
-       ]);
+        if ($status != Password::RESET_LINK_SENT) {
+            throw ValidationException::withMessages([
+                'email' => [__($status)],
+            ]);
+        }
 
-       $status = Password::sendResetLink(
-           $request->only('email')
-       );
-
-       if ($status != Password::RESET_LINK_SENT) {
-           throw ValidationException::withMessages([
-               'email' => [__($status)],
-           ]);
-       }
-
-       return response()->json(['status' => __($status)]);
-   }
-
+        return response()->json(['status' => __($status)]);
+    }
     /**
      * Handle an incoming new password request.
      *
@@ -126,7 +129,7 @@ class UserController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
-       
+
         $status = Password::reset(
             $request->only('email', 'password', 'password_confirmation', 'token'),
             function ($user) use ($request) {
@@ -149,10 +152,7 @@ class UserController extends Controller
     }
     public function profile(Request $request)
     {
-
         $user = $request->user();
-
-
         return new UserResource($user);
     }
     public function destroy(Request $request): Response
@@ -165,5 +165,4 @@ class UserController extends Controller
 
         return response()->noContent();
     }
-    
 }

@@ -41,7 +41,7 @@ Route::get('/email/verify/{id}/{hash}', [VerifyEmailController::class, '__invoke
 
 
 
-Route::middleware('auth:sanctum')->put('/user/{user}', [UserController::class, 'update']);
+Route::middleware('auth:sanctum')->post('/user/{user}', [UserController::class, 'update']);
 
 
 

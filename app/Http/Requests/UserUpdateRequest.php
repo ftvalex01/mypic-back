@@ -21,11 +21,11 @@ class UserUpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['sometimes', 'string'],
-            'password' => ['sometimes', 'confirmed', Password::defaults()],
+            'name' => ['sometimes', 'string', 'max:255'],
+            'password' => ['sometimes', 'confirmed'],
             'birth_date' => ['sometimes', 'date'],
             'bio' => ['nullable', 'string'],
-            'profile_picture' => ['nullable', 'string'],
+            'profile_picture' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
             'available_pines' => ['sometimes', 'integer'],
             'accumulated_points' => ['sometimes', 'integer'],
         ];
