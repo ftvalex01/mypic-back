@@ -76,6 +76,30 @@ class UserController extends Controller
         }
     }
 
+    public function toggleFollow(Request $request, $userId)
+{
+    $userToFollow = User::find($userId);
+    if (!$userToFollow) {
+        return response()->json(['error' => 'User not found'], 404);
+    }
+
+    $currentUser = auth()->user();
+    $isFollowing = $currentUser->following()->toggle($userToFollow->id);
+
+    // `toggle` devuelve un array con los cambios, puedes ajustar esta lógica según tu implementación
+    $currentlyFollowing = !empty($isFollowing['attached']); 
+
+    return response()->json(['isFollowing' => $currentlyFollowing]);
+}
+    // Dentro de app/Models/User.php
+
+    public function follows()
+    {
+        $users = User::with('following')->get();
+        return response()->json($users);
+    }
+
+
     public function show(Request $request, User $user)
     {
         return new UserResource($user);
@@ -160,6 +184,24 @@ class UserController extends Controller
         }
 
         return response()->json(['status' => __($status)]);
+    }
+
+    public function followData($userId)
+    {
+
+        // dd($userId);
+        // Log::info('Datos recibidos:', $userId);
+
+        $user = User::withCount(['followers', 'following'])->find($userId);
+
+        if (!$user) {
+            return response()->json(['message' => 'User not found'], 404);
+        }
+
+        return response()->json([
+            'followersCount' => $user->followers_count,
+            'followingCount' => $user->following_count
+        ]);
     }
     public function profile(Request $request)
     {

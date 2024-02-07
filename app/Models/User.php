@@ -49,11 +49,11 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     protected $casts = [
         'birth_date' => 'date',
-        'register_date' => 'timestamp', 
+        'register_date' => 'timestamp',
         'email_verified_at' => 'timestamp',
     ];
 
-  
+
 
     public function posts(): HasMany
     {
@@ -70,15 +70,15 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Reaction::class);
     }
 
-    public function userFollowers(): HasMany
-    {
-        return $this->hasMany(UserFollower::class);
-    }
+    // public function userFollowers(): HasMany
+    // {
+    //     return $this->hasMany(UserFollower::class);
+    // }
 
-    public function userFollowings(): HasMany
-    {
-        return $this->hasMany(UserFollowing::class);
-    }
+    // public function userFollowings(): HasMany
+    // {
+    //     return $this->hasMany(UserFollowing::class);
+    // }
 
     public function purchases(): HasMany
     {
@@ -87,5 +87,17 @@ class User extends Authenticatable implements MustVerifyEmail
     public function media(): HasMany
     {
         return $this->hasMany(Media::class);
+    }
+    public function followers()
+    {
+        // Esta relación asume que hay una tabla 'user_followers' con columnas 'user_id' y 'follower_id'
+        // 'follower_id' es el ID del usuario que sigue, 'user_id' es el ID del usuario que es seguido
+        return $this->belongsToMany(User::class, 'followers', 'user_id', 'follower_id');
+    }
+
+    public function following()
+    {
+        // La inversa de la relación anterior
+        return $this->belongsToMany(User::class, 'followers', 'follower_id', 'user_id');
     }
 }
