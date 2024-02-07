@@ -15,14 +15,18 @@ class PostResource extends JsonResource
         return [
             'id' => $this->id,
             'user_id' => $this->user_id,
-            'title' => $this->title,
             'description' => $this->description,
             'publish_date' => $this->publish_date,
             'life_time' => $this->life_time,
             'permanent' => $this->permanent,
-            'media_id' => $this->media_id,
+            'isLiked' => $this->isLikedByUser(auth()->id()),
+            'likesCount' => $this->reactions->count(),
+
+            'user' => new UserResource($this->whenLoaded('user')),
             'media' => MediumResource::make($this->whenLoaded('media')),
-            'interactionHistories' => InteractionHistoryCollection::make($this->whenLoaded('interactionHistories')),
+            'comments' => CommentResource::collection($this->whenLoaded('comments')),
+            'reactions' => ReactionResource::collection($this->whenLoaded('reactions')),
+            //'interactionHistories' => InteractionHistoryCollection::make($this->whenLoaded('interactionHistories')),
         ];
     }
 }

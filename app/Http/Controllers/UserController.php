@@ -75,7 +75,7 @@ class UserController extends Controller
             return response()->json(['error' => 'An unexpected error occurred during registration. Please try again.'], 422);
         }
     }
-
+    
     public function show(Request $request, User $user)
     {
         return new UserResource($user);

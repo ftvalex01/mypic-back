@@ -25,7 +25,7 @@ class Post extends Model
         'permanent',
         'media_id',
     ];
-
+    protected $appends = ['likesCount'];
     /**
      * The attributes that should be cast to native types.
      *
@@ -35,7 +35,23 @@ class Post extends Model
         'publish_date' => 'timestamp',
         'permanent' => 'boolean',
     ];
-
+    protected static function booted()
+    {
+        static::deleting(function ($post) {
+            // Asegurarse de eliminar todos los comentarios y reacciones asociadas al post antes de eliminarlo
+            $post->comments()->delete(); // Esto eliminará todos los comentarios relacionados
+            $post->reactions()->delete(); // Esto eliminará todas las reacciones relacionadas
+        });
+    }
+    public function getLikesCountAttribute()
+    {
+        // Asumiendo que quieres contar todas las reacciones para este post
+        return $this->reactions()->count();
+    }
+    public function isLikedByUser($userId)
+    {
+        return $this->reactions()->where('user_id', $userId)->exists();
+    }
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
@@ -46,15 +62,17 @@ class Post extends Model
         return $this->belongsTo(Media::class);
     }
 
-    public function comments(): HasMany
-    {
-        return $this->hasMany(Comment::class);
-    }
+    // En tu modelo Post
+public function comments()
+{
+    return $this->morphMany(Comment::class, 'commentable');
+}
 
-    public function reactions(): HasMany
-    {
-        return $this->hasMany(Reaction::class);
-    }
+
+public function reactions()
+{
+    return $this->morphMany(Reaction::class, 'reactable');
+}
 
     public function interactionHistories(): HasMany
     {

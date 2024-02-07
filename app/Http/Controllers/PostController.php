@@ -16,13 +16,13 @@ use Illuminate\Support\Facades\Storage;
 
 class PostController extends Controller
 {
-    public function index(Request $request)
-    {
-        $posts = Post::all();
+    public function index()
+{
+    $posts = Post::with(['user', 'media', 'comments', 'reactions'])->paginate(10);
+    return PostResource::collection($posts);
+}
 
-        return new PostCollection($posts);
-    }
-    
+      
     public function store(Request $request)
     {
         // Iniciar transacción de base de datos
