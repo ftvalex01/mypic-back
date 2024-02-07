@@ -53,9 +53,12 @@ Route::middleware('auth:sanctum')->post('/user/{user}', [UserController::class, 
 
 Route::middleware('auth:sanctum')->get('/user/{user}/images', [MediaController::class, 'getUserImages']);
 
-Route::apiResource('user-follower', App\Http\Controllers\UserFollowerController::class);
+Route::post('/user/{user}/follow', [UserController::class, 'toggleFollow'])->middleware('auth:sanctum');
 
-Route::apiResource('user-following', App\Http\Controllers\UserFollowingController::class);
+Route::get('/user/follows', [UserController::class, 'follows']);
+
+Route::get('/user/{userId}/follow-data', [UserController::class, 'followData'])->middleware('auth:sanctum');
+
 
 Route::middleware('auth:sanctum')->get('/user/{username}', [UserController::class, 'getUserByUsername']);
 
