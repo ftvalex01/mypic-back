@@ -2,7 +2,9 @@
 
 use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 use App\Http\Controllers\Auth\VerifyEmailController;
+use App\Http\Controllers\CommentController;
 use App\Http\Controllers\MediaController;
+use App\Http\Controllers\ReactionController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
@@ -60,6 +62,11 @@ Route::get('/user/{userId}/follow-data', [UserController::class, 'followData'])-
 
 Route::middleware('auth:sanctum')->get('/user/{username}', [UserController::class, 'getUserByUsername']);
 
+Route::post('/post/{post}/reactions', [ReactionController::class, 'store'])->middleware('auth:sanctum');
+Route::post('/post/{post}/comments', [CommentController::class, 'store'])->middleware('auth:sanctum');
+// Dentro de routes/api.php
+Route::post('/posts/{post}/comments/{comment}/likes', [CommentController::class, 'like']);
+Route::delete('/posts/{post}/comments/{comment}', [CommentController::class, 'destroy']);
 
 Route::middleware('auth:sanctum')->get('/users', [UserController::class, 'index']);
 

@@ -20,9 +20,11 @@ class CommentStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'user_id' => ['required', 'integer'],
+          
             'text' => ['required', 'string'],
-            'comment_date' => ['required'],
+            'comment_date' => ['required', 'date'], // Asegúrate de validar como fecha
+            'post_id' => ['required', 'integer', 'exists:posts,id'], // Añade esto para asegurar que el post exista
         ];
     }
+    
 }

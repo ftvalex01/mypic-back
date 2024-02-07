@@ -20,7 +20,7 @@ class ReactionStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'user_id' => ['required', 'integer'],
+            'post_id' => ['required', 'integer', 'exists:posts,id']
         ];
     }
 }

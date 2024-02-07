@@ -26,7 +26,8 @@ class Reaction extends Model
     }
 
     public function reactable(): MorphTo
-    {
-        return $this->morphTo();
-    }
+{
+    return $this->morphTo();
+}
+
 }
