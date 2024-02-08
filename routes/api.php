@@ -66,8 +66,10 @@ Route::post('/post/{post}/reactions', [ReactionController::class, 'store'])->mid
 Route::post('/post/{post}/comments', [CommentController::class, 'store'])->middleware('auth:sanctum');
 // Dentro de routes/api.php
 Route::post('/posts/{post}/comments/{comment}/likes', [CommentController::class, 'like']);
-Route::delete('/posts/{post}/comments/{comment}', [CommentController::class, 'destroy']);
+
 Route::get('/user/{username}', [UserController::class, 'getUserByUsername']);
+Route::delete('/comments/{comment}', [CommentController::class, 'destroy']);
+
 
 Route::middleware('auth:sanctum')->get('/users', [UserController::class, 'index']);
 

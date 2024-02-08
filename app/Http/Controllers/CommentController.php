@@ -94,18 +94,25 @@ public function like(Request $request, $postId, $commentId) {
 }
 
 
-public function destroy($postId, $commentId) {
-    $comment = Comment::where('id', $commentId)->where('post_id', $postId)->first();
+// Método destroy simplificado para solo usar $commentId
+public function destroy($commentId) {
+    $userId = auth()->id();
+    Log::info('Datos recibidos:', ['commentId' => $commentId]);
+
+    $comment = Comment::find($commentId);
+
     if (!$comment) {
         return response()->json(['message' => 'Comment not found'], 404);
     }
 
-    // Verifica si el usuario actual es el autor del comentario o del post
-    if (auth()->id() == $comment->user_id || auth()->id() == $comment->post->user_id) {
-        $comment->delete();
-        return response()->json(['message' => 'Comment deleted successfully']);
-    } else {
+    // Verifica si el usuario actual tiene permiso para borrar el comentario
+    if ($userId != $comment->user_id) {
         return response()->json(['message' => 'Unauthorized'], 403);
     }
+
+    $comment->delete();
+    return response()->json(['message' => 'Comment deleted successfully']);
 }
+
+
 }
