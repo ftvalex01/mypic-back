@@ -23,7 +23,7 @@ class CommentStoreRequest extends FormRequest
           
             'text' => ['required', 'string'],
             'comment_date' => ['required', 'date'], // Asegúrate de validar como fecha
-            'post_id' => ['required', 'integer', 'exists:posts,id'], // Añade esto para asegurar que el post exista
+            //'post_id' => ['required', 'integer', 'exists:posts,id'], // Añade esto para asegurar que el post exista
         ];
     }
     
