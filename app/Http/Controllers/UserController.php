@@ -90,7 +90,27 @@ class UserController extends Controller
 
     return response()->json(['isFollowing' => $currentlyFollowing]);
 }
-    // Dentro de app/Models/User.php
+public function updatePrivacy(Request $request, $userId)
+{
+    $user = auth()->user();
+
+    // Asegúrate de que el usuario solo pueda actualizar su propia privacidad
+    if ($user->id != $userId) {
+        return response()->json(['message' => 'Unauthorized'], 403);
+    }
+
+    // Validar la entrada
+    $data = $request->validate([
+        'isPrivate' => 'required|boolean',
+    ]);
+
+    // Actualizar la privacidad del perfil
+    $user->is_private = $data['isPrivate'];
+    $user->save();
+
+    return response()->json(['isPrivate' => $user->is_private]);
+}
+
 
     public function follows()
     {

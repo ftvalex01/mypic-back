@@ -71,12 +71,24 @@ class MediaController extends Controller
 
         return response()->noContent();
     }
-    public function getUserImages($userId) {
-        $user = User::findOrFail($userId);
-        $images = $user->media()->where('type', 'photo')->get();
-    
-        return response()->json($images);
+    public function getUserImages($userId)
+{
+    $user = User::with('followers')->findOrFail($userId);
+    $requestingUser = auth()->user();
+
+    // Verificar si el perfil es privado
+    if ($user->is_private) {
+        // Si el usuario solicitante no sigue al dueño del perfil y no es el dueño, restringir acceso
+        if (!$user->followers->contains($requestingUser->id) && $user->id != $requestingUser->id) {
+            return response()->json(['message' => 'No autorizado para ver las imágenes.'], 403);
+        }
     }
+
+    $images = $user->media()->where('type', 'photo')->get();
+
+    return MediumResource::collection($images);
+}
+
     
     
 }

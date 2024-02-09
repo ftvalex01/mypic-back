@@ -70,6 +70,7 @@ Route::post('/posts/{post}/comments/{comment}/likes', [CommentController::class,
 Route::get('/user/{username}', [UserController::class, 'getUserByUsername']);
 Route::delete('/comments/{comment}', [CommentController::class, 'destroy']);
 
+Route::middleware('auth:sanctum')->patch('/user/{user}/privacy', [UserController::class, 'updatePrivacy']);
 
 Route::middleware('auth:sanctum')->get('/users', [UserController::class, 'index']);
 

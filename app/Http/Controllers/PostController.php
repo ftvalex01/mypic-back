@@ -16,11 +16,25 @@ use Illuminate\Support\Facades\Storage;
 
 class PostController extends Controller
 {
-    public function index()
-{
-    $posts = Post::with(['user', 'media', 'comments', 'reactions'])->paginate(10);
-    return PostResource::collection($posts);
-}
+    public function index(Request $request)
+    {
+        $user = auth()->user();
+    
+        // Obtener los IDs de los usuarios que el usuario actual sigue
+        $followingIds = $user->following->pluck('id')->toArray();
+    
+        // Agregar el propio ID del usuario para incluir sus publicaciones
+        $followingIds[] = $user->id;
+    
+        // Recuperar publicaciones basadas en la configuración de privacidad
+        $posts = Post::whereHas('user', function ($query) use ($followingIds, $user) {
+            // Incluir publicaciones de usuarios seguidos o de perfiles públicos
+            $query->whereIn('id', $followingIds)->orWhere('is_private', false);
+        })->with(['user', 'media', 'comments', 'reactions'])->paginate(10);
+    
+        return PostResource::collection($posts);
+    }
+    
 
       
     public function store(Request $request)

@@ -30,6 +30,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'available_pines',
         'profile_picture',
         'accumulated_points',
+        'is_private'
     ];
 
     /**

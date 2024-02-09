@@ -20,6 +20,7 @@ return new class extends Migration
             $table->date('birth_date');
             $table->timestamp('register_date');
             $table->text('bio')->nullable();
+            $table->boolean('is_private')->default(false);
             $table->timestamp('email_verified_at')->nullable();
             $table->integer('available_pines')->default(3);
             $table->text('profile_picture')->nullable();
