@@ -70,9 +70,13 @@ class CommentController extends Controller
 public function like(Request $request, $postId, $commentId) {
     $userId = auth()->id();
 
-    // Encuentra el comentario específico
-    $comment = Comment::where('id', $commentId)->where('post_id', $postId)->first();
-    
+    // Asegúrate de ajustar esta parte para que funcione con tu estructura polimórfica
+    $comment = Comment::where('id', $commentId)
+                        ->where('commentable_id', $postId)
+                        ->where('commentable_type', Post::class) // Asume que tus comentarios se relacionan con posts de esta manera
+                        ->first();
+                        $likesCount = $comment->reactions()->count();
+                        $isLiked = $comment->reactions()->where('user_id', $userId)->exists();
     if (!$comment) {
         return response()->json(['message' => 'Comment not found'], 404);
     }
@@ -90,7 +94,11 @@ public function like(Request $request, $postId, $commentId) {
         $message = 'Like added to comment';
     }
 
-    return response()->json(['message' => $message]);
+    return response()->json([
+        'message' => $message,
+        'likesCount' => $likesCount,
+        'isLiked' => $isLiked,
+    ]);
 }
 
 
