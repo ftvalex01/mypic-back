@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\MediaController;
+use App\Http\Controllers\PostController;
 use App\Http\Controllers\ReactionController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -48,6 +49,7 @@ Route::get('/email/verify/{id}/{hash}', [VerifyEmailController::class, '__invoke
 
 
 
+Route::get('/explore', [PostController::class, 'explore'])->middleware('auth:sanctum');
 
 Route::middleware('auth:sanctum')->post('/user/{user}', [UserController::class, 'update']);
 

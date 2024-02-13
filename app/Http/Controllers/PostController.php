@@ -89,7 +89,15 @@ class PostController extends Controller
         }
     }
 
-    
+    public function explore(Request $request)
+{
+    $posts = Post::whereHas('user', function ($query) {
+        $query->where('is_private', false); // Filtra usuarios con perfiles públicos
+    })->with(['user', 'media', 'comments', 'reactions'])->paginate(10); // Ajusta la paginación según necesites
+
+    return PostResource::collection($posts);
+}
+
     public function show(Request $request, Post $post)
     {
         return new PostResource($post);
