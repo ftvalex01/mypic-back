@@ -68,7 +68,7 @@ Route::post('/post/{post}/reactions', [ReactionController::class, 'store'])->mid
 Route::post('/post/{post}/comments', [CommentController::class, 'store'])->middleware('auth:sanctum');
 // Dentro de routes/api.php
 Route::post('/posts/{post}/comments/{comment}/likes', [CommentController::class, 'like']);
-
+Route::middleware('auth:sanctum')->get('/notifications', [\App\Http\Controllers\NotificationController::class, 'index']);
 Route::get('/user/{username}', [UserController::class, 'getUserByUsername']);
 Route::delete('/comments/{comment}', [CommentController::class, 'destroy']);
 
@@ -88,7 +88,7 @@ Route::apiResource('view', App\Http\Controllers\ViewController::class);
 
 Route::apiResource('message', App\Http\Controllers\MessageController::class);
 
-Route::apiResource('notification', App\Http\Controllers\NotificationController::class);
+
 
 Route::apiResource('album', App\Http\Controllers\AlbumController::class);
 

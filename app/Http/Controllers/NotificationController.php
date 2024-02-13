@@ -9,16 +9,16 @@ use App\Http\Resources\NotificationResource;
 use App\Models\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Log;
 
 class NotificationController extends Controller
 {
-    public function index(Request $request): Response
+    public function index(Request $request)
     {
         $notifications = Notification::all();
-
         return new NotificationCollection($notifications);
     }
-
+    
     public function store(NotificationStoreRequest $request): Response
     {
         $notification = Notification::create($request->validated());
