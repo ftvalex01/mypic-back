@@ -2,15 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\PostReacted;
 use App\Http\Requests\ReactionStoreRequest;
 use App\Http\Requests\ReactionUpdateRequest;
 use App\Http\Resources\ReactionCollection;
 use App\Http\Resources\ReactionResource;
 use App\Models\Comment;
+use App\Models\Notification;
 use App\Models\Post;
 use App\Models\Reaction;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class ReactionController extends Controller
@@ -23,30 +27,49 @@ class ReactionController extends Controller
     }
     // En App\Http\Controllers\ReactionController.php
 
-public function store(Request $request) {
-    $userId = auth()->id();
-    $reactableType = $request->reactable_type; // 'Post' o 'Comment'
-    $reactableId = $request->reactable_id;
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'reactable_id' => 'required|exists:posts,id',
+            'reactable_type' => 'required|in:Post,Comment', // Asegúrate de que este valor se maneje correctamente
+        ]);
 
-    // Determina el tipo de modelo reactable
-    $model = $reactableType === 'Comment' ? Comment::class : Post::class;
+        $userId = auth()->id();
+        $reactableType = $validated['reactable_type'];
+        $reactableId = $validated['reactable_id'];
 
-    // Encuentra la entidad a la que se le da like
-    $reactable = $model::find($reactableId);
-    if (!$reactable) {
-        return response()->json(['message' => 'Entity not found'], 404);
-    }
+        // Determina el tipo de modelo reactable
+        $model = $reactableType === 'Comment' ? Comment::class : Post::class;
 
-    // Verifica si ya existe un like del usuario
-    $existingReaction = $reactable->reactions()->where('user_id', $userId)->first();
-    if ($existingReaction) {
-        $existingReaction->delete();
+        // Encuentra la entidad a la que se le da like
+        $reactable = $model::findOrFail($reactableId);
+
+        // Verifica si ya existe un like del usuario
+        $existingReaction = $reactable->reactions()->where('user_id', $userId)->first();
+
+        if ($existingReaction) {
+            $existingReaction->delete();
+            // Considera si debes manejar la eliminación de notificaciones aquí
+        } else {
+            // Crea la reacción
+            $reactable->reactions()->create(['user_id' => $userId]);
+
+            // Crea una notificación para el dueño del post o comentario
+            Notification::create([
+                'user_id' => $reactable->user_id, // Asume que tu entidad reactable tiene una relación `user`
+                'type' => 'reaction', // Aquí podrías tener una lógica para determinar el tipo si hay varios
+                'related_id' => $userId,
+                'notification_date' => now(),
+            ]);
+
+            // Respuesta al cliente
+            return response()->json(['message' => 'Like added and notification created']);
+        }
+
         return response()->json(['message' => 'Like removed']);
-    } else {
-        $reactable->reactions()->create(['user_id' => $userId]);
-        return response()->json(['message' => 'Like added']);
     }
-}
+
+
 
     
     

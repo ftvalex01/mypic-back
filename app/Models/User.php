@@ -101,4 +101,9 @@ class User extends Authenticatable implements MustVerifyEmail
         // La inversa de la relación anterior
         return $this->belongsToMany(User::class, 'followers', 'follower_id', 'user_id');
     }
+    public function notifications()
+{
+    return $this->hasMany(Notification::class, 'user_id');
+}
+
 }

@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\MediaController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ReactionController;
 use App\Http\Controllers\UserController;
@@ -75,6 +76,8 @@ Route::delete('/comments/{comment}', [CommentController::class, 'destroy']);
 Route::middleware('auth:sanctum')->patch('/user/{user}/privacy', [UserController::class, 'updatePrivacy']);
 
 Route::middleware('auth:sanctum')->get('/users', [UserController::class, 'index']);
+// Agrega esta línea en routes/api.php dentro del grupo de middleware 'auth:sanctum'
+Route::get('/notifications/unread', [NotificationController::class, 'unreadCount']);
 
 Route::apiResource('comment', App\Http\Controllers\CommentController::class);
 

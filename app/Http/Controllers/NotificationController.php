@@ -15,9 +15,21 @@ class NotificationController extends Controller
 {
     public function index(Request $request)
     {
-        $notifications = Notification::all();
-        return new NotificationCollection($notifications);
+        $user = $request->user();
+        $notificationsQuery = Notification::where('user_id', $user->id);
+    
+        if ($request->has('unread')) {
+            $notificationsQuery->where('read', false);
+        }
+    
+        $notifications = $notificationsQuery->with('user') // Asegúrate de que tienes una relación 'user' en el modelo Notification
+                                    ->orderBy('notification_date', 'desc')
+                                    ->paginate(10);
+    
+        return NotificationResource::collection($notifications);
     }
+    
+    
     
     public function store(NotificationStoreRequest $request): Response
     {
@@ -31,13 +43,30 @@ class NotificationController extends Controller
         return new NotificationResource($notification);
     }
 
-    public function update(NotificationUpdateRequest $request, Notification $notification): Response
+    public function update(Request $request, Notification $notification)
     {
-        $notification->update($request->validated());
-
+        // Asegurarse de que el usuario autenticado es el dueño de la notificación
+        if ($request->user()->id !== $notification->user_id) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+    
+        // Solo permitir actualizar el estado de 'read'
+        $notification->update([
+            'read' => true,
+        ]);
+    
         return new NotificationResource($notification);
     }
-
+    
+    public function unreadCount(Request $request)
+    {
+        $userId = $request->user()->id;
+        $count = Notification::where('user_id', $userId)->where('read', false)->count();
+    
+        return response()->json(['unreadCount' => $count]);
+    }
+    
+    
     public function destroy(Request $request, Notification $notification): Response
     {
         $notification->delete();

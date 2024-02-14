@@ -21,8 +21,12 @@ return new class extends Migration
             $table->boolean('read')->default(false);
             $table->timestamp('notification_date')->useCurrent();
             $table->timestamps();
+
+            // Agregar índices para optimizar las consultas
+            $table->index('user_id');
+            $table->index('read');
+            $table->index('notification_date');
         });
-        
 
         Schema::enableForeignKeyConstraints();
     }
