@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
@@ -20,10 +21,13 @@ class NotificationResource extends JsonResource
             'read' => $this->read,
             'notification_date' => $this->notification_date,
             'user' => UserResource::make($this->whenLoaded('user')),
-            'user_name' => $this->whenLoaded('user', function () {
-                return $this->user->name; // Asegúrate de que el modelo de usuario tenga un campo 'name'
+            'related_user' => new UserResource($this->whenLoaded('relatedUser')),
+            'user_name' => optional($this->whenLoaded('user'))->name,
+            'post_id' => $this->when($this->type === 'reaction' || $this->type === 'comment', function () {
+                // Asumiendo que related_id es el ID del post para notificaciones de tipo 'reaction' y 'comment'
+                return $this->related_id; // Usa directamente related_id si se refiere al post
             }),
-            'time_ago' => Carbon::parse($this->notification_date)->diffForHumans(), // Calcula el tiempo relativo
+            'time_ago' => Carbon::parse($this->notification_date)->diffForHumans(),
         ];
     }
 }

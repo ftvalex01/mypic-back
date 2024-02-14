@@ -19,6 +19,8 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Validation\ValidationException;
+use App\Events\UserFollowed;
+use App\Models\Notification;
 
 class UserController extends Controller
 {
@@ -75,7 +77,7 @@ class UserController extends Controller
             return response()->json(['error' => 'An unexpected error occurred during registration. Please try again.'], 422);
         }
     }
-     public function toggleFollow(Request $request, $userId)
+    public function toggleFollow(Request $request, $userId)
 {
     $userToFollow = User::find($userId);
     if (!$userToFollow) {
@@ -83,13 +85,72 @@ class UserController extends Controller
     }
 
     $currentUser = auth()->user();
-    $isFollowing = $currentUser->following()->toggle($userToFollow->id);
+    
+    // Verifica si el perfil es privado
+    if ($userToFollow->is_private) {
+        // Lógica para manejar solicitud de seguimiento
+        // Puedes usar el modelo Notification para crear una solicitud de seguimiento
+        Notification::create([
+            'user_id' => $userToFollow->id, // El dueño del perfil
+            'type' => 'follow_request',
+            'related_id' => $currentUser->id, // Quien quiere seguir
+            'read' => false,
+            'notification_date' => now(),
+        ]);
 
-    // `toggle` devuelve un array con los cambios, puedes ajustar esta lógica según tu implementación
-    $currentlyFollowing = !empty($isFollowing['attached']); 
+        return response()->json(['message' => 'Follow request sent']);
+    } else {
+        // Lógica existente para seguir a un usuario
+        $isFollowing = $currentUser->following()->toggle($userToFollow->id);
 
-    return response()->json(['isFollowing' => $currentlyFollowing]);
+        $currentlyFollowing = !empty($isFollowing['attached']);
+    
+        return response()->json(['isFollowing' => $currentlyFollowing]);
+    }
 }
+public function rejectFollowRequest(Request $request, $notificationId)
+{
+    $notification = Notification::find($notificationId);
+
+    if (!$notification || $notification->type !== 'follow_request') {
+        return response()->json(['message' => 'Invalid request'], 404);
+    }
+
+    // Asegurarse de que el usuario autenticado es el destinatario de la solicitud de seguimiento
+    if ($notification->user_id !== auth()->id()) {
+        return response()->json(['message' => 'Unauthorized'], 403);
+    }
+
+    // Eliminar la notificación
+    $notification->delete();
+
+    return response()->json(['message' => 'Follow request rejected']);
+}
+
+public function acceptFollowRequest(Request $request, $notificationId)
+{
+    $notification = Notification::find($notificationId);
+
+    if (!$notification || $notification->type !== 'follow_request') {
+        return response()->json(['message' => 'Invalid request'], 404);
+    }
+
+    // Asegurarse de que el usuario autenticado es el destinatario de la solicitud de seguimiento
+    if ($notification->user_id !== auth()->id()) {
+        return response()->json(['message' => 'Unauthorized'], 403);
+    }
+
+    // Establecer la relación de seguimiento
+    $followerId = $notification->related_id;
+    $user = User::find(auth()->id());
+    $user->followers()->attach($followerId);
+
+    // Marcar la notificación como leída o eliminarla
+    $notification->delete();
+
+    return response()->json(['message' => 'Follow request accepted']);
+}
+
 public function updatePrivacy(Request $request, $userId)
 {
     $user = auth()->user();
@@ -206,22 +267,27 @@ public function updatePrivacy(Request $request, $userId)
     }
 
     public function followData($userId)
-    {
-
-        // dd($userId);
-        // Log::info('Datos recibidos:', $userId);
-
-        $user = User::withCount(['followers', 'following'])->find($userId);
-
-        if (!$user) {
-            return response()->json(['message' => 'User not found'], 404);
-        }
-
-        return response()->json([
-            'followersCount' => $user->followers_count,
-            'followingCount' => $user->following_count
-        ]);
+{
+    $user = User::withCount(['followers', 'following'])->find($userId);
+    if (!$user) {
+        return response()->json(['message' => 'User not found'], 404);
     }
+
+    // Obtiene el usuario actual autenticado
+    $currentUser = auth()->user();
+    // Verifica si el usuario actual está siguiendo al usuario de destino
+    $isFollowing = false;
+    if ($currentUser) {
+        $isFollowing = $currentUser->following()->where('users.id', $userId)->exists();
+    }
+
+    return response()->json([
+        'followersCount' => $user->followers_count,
+        'followingCount' => $user->following_count,
+        'isFollowing' => $isFollowing,
+    ]);
+}
+
     public function profile(Request $request)
     {
         $user = $request->user();

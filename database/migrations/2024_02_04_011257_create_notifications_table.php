@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('notifications', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->enum('type', ["reaction","comment","follow","message"]);
+            $table->enum('type', ["reaction","comment","follow","message","follow_request"]);
             $table->unsignedBigInteger('related_id');
             $table->boolean('read')->default(false);
             $table->timestamp('notification_date')->useCurrent();

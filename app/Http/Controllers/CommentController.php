@@ -7,6 +7,7 @@ use App\Http\Requests\CommentUpdateRequest;
 use App\Http\Resources\CommentCollection;
 use App\Http\Resources\CommentResource;
 use App\Models\Comment;
+use App\Models\Notification;
 use App\Models\Post;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -33,25 +34,27 @@ class CommentController extends Controller
         Log::info('Datos recibidos después de la validación:', $request->validated());
         return new CommentResource($comment);
     } */
-    public function store(CommentStoreRequest $request, $post)
+    public function store(CommentStoreRequest $request, $postId)
     {
         // Asegúrate de que el post_id recibido en la ruta sea válido
-        $post = Post::findOrFail($post); // Esto automáticamente lanzará un error 404 si el post no existe
-
+        $post = Post::findOrFail($postId); // Esto automáticamente lanzará un error 404 si el post no existe
+    
         // Crear el comentario asociado al post
         $comment = new Comment();
         $comment->text = $request->text;
         $comment->comment_date = now(); // O usa $request->comment_date si prefieres enviarlo desde el cliente
         $comment->user_id = auth()->id(); // Asumiendo que quieres asociar el comentario al usuario autenticado
         $post->comments()->save($comment); // Asocia y guarda el comentario en relación al post
-
-        // Otra forma, si prefieres usar la asignación masiva y ya tienes configurado el fillable en el modelo Comment
-        // $comment = $post->comments()->create([
-        //     'text' => $request->text,
-        //     'comment_date' => now(), // O usa $request->comment_date
-        //     'user_id' => auth()->id(),
-        // ]);
-
+    
+        // Después de guardar el comentario, crea una notificación para el propietario del post
+        Notification::create([
+            'user_id' => $post->user_id, // El propietario del post recibirá la notificación
+            'type' => 'comment',
+            'related_id' => auth()->id(), // El autor del comentario
+            'read' => false,
+            'notification_date' => now(),
+        ]);
+    
         return new CommentResource($comment); // Suponiendo que tienes un CommentResource para formatear la salida
     }
     public function show(Request $request, Comment $comment)

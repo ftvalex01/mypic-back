@@ -22,9 +22,10 @@ class NotificationController extends Controller
             $notificationsQuery->where('read', false);
         }
     
-        $notifications = $notificationsQuery->with('user') // Asegúrate de que tienes una relación 'user' en el modelo Notification
-                                    ->orderBy('notification_date', 'desc')
-                                    ->paginate(10);
+        $notifications = Notification::where('user_id', $user->id)
+        ->with(['user', 'relatedUser']) // Asumiendo que tienes una relación relatedUser definida
+        ->orderBy('notification_date', 'desc')
+        ->paginate(10);
     
         return NotificationResource::collection($notifications);
     }
@@ -45,18 +46,25 @@ class NotificationController extends Controller
 
     public function update(Request $request, Notification $notification)
     {
-        // Asegurarse de que el usuario autenticado es el dueño de la notificación
+        Log::info('Update Notification: ', [
+            'user_id' => $request->user()->id, 
+            'notification_user_id' => $notification->user_id
+        ]);
+    
+        // Asegúrate de que el usuario autenticado es el dueño de la notificación
         if ($request->user()->id !== $notification->user_id) {
+            Log::info('Unauthorized attempt to update notification', [
+                'user_id' => $request->user()->id,
+                'notification_id' => $notification->id
+            ]);
             return response()->json(['message' => 'Unauthorized'], 403);
         }
     
         // Solo permitir actualizar el estado de 'read'
-        $notification->update([
-            'read' => true,
-        ]);
-    
+        $notification->update(['read' => true]);
         return new NotificationResource($notification);
     }
+    
     
     public function unreadCount(Request $request)
     {
@@ -66,7 +74,12 @@ class NotificationController extends Controller
         return response()->json(['unreadCount' => $count]);
     }
     
-    
+    public function markAllAsRead(Request $request)
+{
+    $user = $request->user(); // Asume autenticación
+    $user->notifications()->update(['read' => true]);
+    return response()->json(['message' => 'All notifications marked as read']);
+}
     public function destroy(Request $request, Notification $notification): Response
     {
         $notification->delete();
