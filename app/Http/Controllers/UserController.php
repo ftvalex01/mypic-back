@@ -85,29 +85,43 @@ class UserController extends Controller
     }
 
     $currentUser = auth()->user();
-    
-    // Verifica si el perfil es privado
-    if ($userToFollow->is_private) {
-        // Lógica para manejar solicitud de seguimiento
-        // Puedes usar el modelo Notification para crear una solicitud de seguimiento
-        Notification::create([
-            'user_id' => $userToFollow->id, // El dueño del perfil
+
+    // Verificar si el usuario actual ya sigue al usuario objetivo
+    if ($currentUser->following()->where('user_id', $userId)->exists()) {
+        // Ya está siguiendo al usuario, procede a dejar de seguir
+        $currentUser->following()->detach($userId);
+        return response()->json(['isFollowing' => false]);
+    } else if ($userToFollow->is_private) {
+        // El perfil es privado, manejar solicitud de seguimiento
+        $existingNotification = Notification::where([
+            'user_id' => $userId,
+            'related_id' => $currentUser->id,
             'type' => 'follow_request',
-            'related_id' => $currentUser->id, // Quien quiere seguir
-            'read' => false,
-            'notification_date' => now(),
-        ]);
+        ])->first();
 
-        return response()->json(['message' => 'Follow request sent']);
+        if ($existingNotification) {
+            // Ya existe una solicitud de seguimiento pendiente, proceder a cancelarla
+            $existingNotification->delete(); // Eliminar la solicitud existente
+            return response()->json(['message' => 'Follow request cancelled', 'isRequested' => false]);
+        } else {
+            // Crear una nueva solicitud de seguimiento
+            Notification::create([
+                'user_id' => $userId,
+                'type' => 'follow_request',
+                'related_id' => $currentUser->id,
+                'read' => false,
+                'notification_date' => now(),
+            ]);
+
+            return response()->json(['message' => 'Follow request sent', 'isRequested' => true]);
+        }
     } else {
-        // Lógica existente para seguir a un usuario
-        $isFollowing = $currentUser->following()->toggle($userToFollow->id);
-
-        $currentlyFollowing = !empty($isFollowing['attached']);
-    
-        return response()->json(['isFollowing' => $currentlyFollowing]);
+        // El perfil no es privado, proceder a seguir al usuario
+        $currentUser->following()->attach($userId);
+        return response()->json(['isFollowing' => true]);
     }
 }
+    
 public function rejectFollowRequest(Request $request, $notificationId)
 {
     $notification = Notification::find($notificationId);

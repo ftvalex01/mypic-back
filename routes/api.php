@@ -72,7 +72,6 @@ Route::post('/post/{post}/comments', [CommentController::class, 'store'])->middl
 // Dentro de routes/api.php
 Route::post('/posts/{post}/comments/{comment}/likes', [CommentController::class, 'like']);
 Route::middleware('auth:sanctum')->get('/notifications', [\App\Http\Controllers\NotificationController::class, 'index']);
-Route::get('/user/{username}', [UserController::class, 'getUserByUsername']);
 Route::delete('/comments/{comment}', [CommentController::class, 'destroy']);
 
 Route::middleware('auth:sanctum')->patch('/user/{user}/privacy', [UserController::class, 'updatePrivacy']);
