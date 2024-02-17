@@ -24,9 +24,13 @@ use Illuminate\Http\Request;
 */
 
 Route::middleware('auth:sanctum')->group(function () {
-     Route::get('/user', [UserController::class, 'profile']);
+      Route::get('/user', [UserController::class, 'profile']); 
      Route::post('/logout', [UserController::class, 'destroy']);
 });
+Route::get('/check-username/{username}', [UserController::class, 'checkUsernameAvailability']);
+
+Route::get('/user/{username}', [UserController::class, 'getUserByUsername']);
+//Route::middleware('auth:sanctum')->get('/user/{username}', [UserController::class, 'getUserByUsername']);
 Route::post('login', [UserController::class, 'login']);
 Route::post('register', [UserController::class, 'store']);
 
@@ -66,7 +70,7 @@ Route::patch('/notifications/mark-all-read', [NotificationController::class, 'ma
 Route::post('/notifications/{notification}/accept', [UserController::class, 'acceptFollowRequest'])->middleware('auth:sanctum');
 Route::post('/notifications/{notification}/reject', [UserController::class, 'rejectFollowRequest'])->middleware('auth:sanctum');
 
-Route::middleware('auth:sanctum')->get('/user/{username}', [UserController::class, 'getUserByUsername']);
+
 
 Route::post('/post/{post}/reactions', [ReactionController::class, 'store'])->middleware('auth:sanctum');
 Route::post('/post/{post}/comments', [CommentController::class, 'store'])->middleware('auth:sanctum');

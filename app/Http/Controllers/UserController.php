@@ -33,17 +33,28 @@ class UserController extends Controller
         return new UserCollection($users);
     }
 
+    public function checkUsernameAvailability($username)
+    {   
+        Log::info($username);
+        $userExists = User::where('username', $username)->exists();
+        Log::info($userExists);
+        if ($userExists) {
+            return response()->json(['message' => 'Username is already taken'], Response::HTTP_CONFLICT);
+        }
+        return response()->json(['message' => 'Username is available'], Response::HTTP_OK);
+    }
+    
+    // Método para cargar el perfil de usuario
     public function getUserByUsername($username)
     {
         $user = User::where('username', $username)->first();
-
+    
         if (!$user) {
             return response()->json(['message' => 'User not found'], Response::HTTP_NOT_FOUND);
         }
-
         return response()->json($user);
     }
-
+    
     public function store(Request $request)
     {
         try {
