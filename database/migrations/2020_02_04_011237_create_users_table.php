@@ -16,9 +16,9 @@ return new class extends Migration
             $table->string('name');
             $table->string('username')->unique();
             $table->string('email')->unique();
-            $table->string('password');
-            $table->date('birth_date');
-            $table->timestamp('register_date');
+            $table->string('password')->nullable();
+            $table->date('birth_date')->nullable();
+            $table->timestamp('register_date')->useCurrent();
             $table->text('bio')->nullable();
             $table->boolean('is_private')->default(false);
             $table->timestamp('email_verified_at')->nullable();
@@ -27,6 +27,12 @@ return new class extends Migration
             $table->integer('accumulated_points')->default(0);
             $table->rememberToken();
             $table->timestamps();
+            $table->string('github_id')->nullable();
+            $table->string('github_token')->nullable();
+            $table->string('github_refresh_token')->nullable();
+            $table->string('google2fa_secret')->nullable();
+            $table->boolean('is_2fa_enabled')->default(false);
+            $table->string('google_id')->nullable();
         });
     }
 

@@ -62,6 +62,7 @@ class UserController extends Controller
                 'password' => Hash::make($request->password),
                 'birth_date' => $request->birth_date,
                 'register_date' => now(),
+                'is_2fa_enabled' =>$request->enable2FA,
             ]);
 
             event(new Registered($user));

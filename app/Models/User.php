@@ -30,7 +30,10 @@ class User extends Authenticatable implements MustVerifyEmail
         'available_pines',
         'profile_picture',
         'accumulated_points',
-        'is_private'
+        'is_private',
+        'is_2fa_enabled', // Asegúrate de que este campo esté incluido
+        'google_id',
+
     ];
 
     /**
