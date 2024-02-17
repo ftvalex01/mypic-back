@@ -212,16 +212,19 @@ public function updatePrivacy(Request $request, $userId)
         return new UserResource($user);
     }
 
-    public function login(LoginRequest $request): Response
+    public function login(LoginRequest $request)
     {
-        /* Log::info('Email: ' . $request->input('email'));
-        Log::info('Password: ' . $request->input('password')); */
         $request->authenticate();
-
+    
         $request->session()->regenerate();
-
-        return response()->noContent();
+    
+        // Obtiene el usuario autenticado
+        $user = $request->user();
+       
+        // Devuelve una respuesta JSON con los datos del usuario
+        return new UserResource($user);
     }
+    
     /**
      * Handle an incoming password reset link request.
      *

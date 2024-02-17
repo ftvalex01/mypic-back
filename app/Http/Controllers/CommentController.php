@@ -43,9 +43,9 @@ class CommentController extends Controller
         $comment = new Comment();
         $comment->text = $request->text;
         $comment->comment_date = now(); // O usa $request->comment_date si prefieres enviarlo desde el cliente
-        $comment->user_id = auth()->id(); // Asumiendo que quieres asociar el comentario al usuario autenticado
+        $comment->user_id = auth()->id();
         $post->comments()->save($comment); // Asocia y guarda el comentario en relación al post
-    
+        
         // Después de guardar el comentario, crea una notificación para el propietario del post
         Notification::create([
             'user_id' => $post->user_id, // El propietario del post recibirá la notificación
@@ -54,7 +54,8 @@ class CommentController extends Controller
             'read' => false,
             'notification_date' => now(),
         ]);
-    
+        
+        $comment->load('user'); // Asumiendo que quieres asociar el comentario al usuario autenticado
         return new CommentResource($comment); // Suponiendo que tienes un CommentResource para formatear la salida
     }
     public function show(Request $request, Comment $comment)

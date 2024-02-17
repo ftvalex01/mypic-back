@@ -61,7 +61,8 @@ Route::post('/user/{user}/follow', [UserController::class, 'toggleFollow'])->mid
 Route::get('/user/follows', [UserController::class, 'follows']);
 
 Route::get('/user/{userId}/follow-data', [UserController::class, 'followData'])->middleware('auth:sanctum');
-
+Route::get('/notifications/unread', [NotificationController::class, 'unreadCount']);
+Route::patch('/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead']);
 Route::post('/notifications/{notification}/accept', [UserController::class, 'acceptFollowRequest'])->middleware('auth:sanctum');
 Route::post('/notifications/{notification}/reject', [UserController::class, 'rejectFollowRequest'])->middleware('auth:sanctum');
 
@@ -78,9 +79,7 @@ Route::middleware('auth:sanctum')->patch('/user/{user}/privacy', [UserController
 
 Route::middleware('auth:sanctum')->get('/users', [UserController::class, 'index']);
 // Agrega esta línea en routes/api.php dentro del grupo de middleware 'auth:sanctum'
-Route::get('/notifications/unread', [NotificationController::class, 'unreadCount']);
 
-Route::patch('/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead']);
 
 
 

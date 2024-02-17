@@ -20,8 +20,8 @@ class PostController extends Controller
     {
         $user = auth()->user();
     
-        // Obtener los IDs de los usuarios que el usuario actual sigue
-        $followingIds = $user->following->pluck('id')->toArray();
+       /*  // Obtener los IDs de los usuarios que el usuario actual sigue
+        $followingIds = $user->following->pluck('id')->toArray(); */
     
         // Agregar el propio ID del usuario para incluir sus publicaciones
         $followingIds[] = $user->id;
