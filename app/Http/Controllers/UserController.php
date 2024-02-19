@@ -226,17 +226,27 @@ public function updatePrivacy(Request $request, $userId)
 
     public function login(LoginRequest $request)
     {
+        // Autentica al usuario
         $request->authenticate();
     
+        // Regenera la sesión
         $request->session()->regenerate();
     
         // Obtiene el usuario autenticado
         $user = $request->user();
-       
-        // Devuelve una respuesta JSON con los datos del usuario
+    
+        // Verifica si el usuario tiene habilitada la verificación de dos factores
+        if ($user->is_2fa_enabled) {
+            return new UserResource($user);
+            // Si la verificación de dos factores está habilitada, devuelve una respuesta indicando que se requiere la verificación de dos factores
+           /*  return response()->json(['requires_2fa_verification' => true]); */
+
+        }
+    
+        // Si la verificación de dos factores no está habilitada, devuelve una respuesta JSON con los datos del usuario
         return new UserResource($user);
     }
-    
+
     /**
      * Handle an incoming password reset link request.
      *

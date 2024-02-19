@@ -20,6 +20,7 @@ class UserResource extends JsonResource
             'birth_date' => $this->birth_date,
             'register_date' => $this->register_date,
             'bio' => $this->bio,
+            'is_2fa_enabled' => $this-> is_2fa_enabled,
             'email_verified_at' => $this->email_verified_at,
             'available_pines' => $this->available_pines,
             'profile_picture' => $this->profile_picture ? asset('storage/'.$this->profile_picture) : null,
