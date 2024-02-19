@@ -69,6 +69,7 @@ Route::get('/notifications/unread', [NotificationController::class, 'unreadCount
 Route::patch('/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead']);
 Route::post('/notifications/{notification}/accept', [UserController::class, 'acceptFollowRequest'])->middleware('auth:sanctum');
 Route::post('/notifications/{notification}/reject', [UserController::class, 'rejectFollowRequest'])->middleware('auth:sanctum');
+Route::get('/explore/recommended', [PostController::class, 'recommended'])->middleware('auth:sanctum');
 
 
 

@@ -67,7 +67,10 @@ public function comments()
 {
     return $this->morphMany(Comment::class, 'commentable');
 }
-
+public function hashtags()
+{
+    return $this->belongsToMany(Hashtag::class, 'hashtag_post', 'post_id', 'hashtag_id');
+}
 
 public function reactions()
 {

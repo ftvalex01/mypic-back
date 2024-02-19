@@ -19,8 +19,8 @@ class Hashtag extends Model
         'name',
     ];
 
-    public function posts(): BelongsToMany
+    public function posts()
     {
-        return $this->belongsToMany(Post::class);
+        return $this->belongsToMany(Post::class, 'hashtag_post', 'hashtag_id', 'post_id');
     }
 }

@@ -18,7 +18,6 @@ class CommentResource extends JsonResource
             'text' => $this->text,
             'comment_date' => $this->comment_date,
             'user' => UserResource::make($this->whenLoaded('user')),
-
             'reactions' => ReactionCollection::make($this->whenLoaded('reactions')),
         ];
     }

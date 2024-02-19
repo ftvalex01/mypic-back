@@ -17,23 +17,12 @@ class CommentController extends Controller
 {
     public function index(Request $request)
     {
-        $comments = Comment::all();
+        $comments = Comment::with('user')->get();
 
         return new CommentCollection($comments);
     }
 
-   /*  public function store(CommentStoreRequest $request, $postId) {
-        $validated = $request->validated();
-        Log::info('Datos recibidos antes de la validación:', $request->all());
-        $comment = Comment::create([
-            'user_id' => auth()->id(),
-            'post_id' => $postId,
-            'text' => $validated['text'],
-            // 'comment_date' se puede manejar automáticamente si es un timestamp en tu migración de la base de datos
-        ]);
-        Log::info('Datos recibidos después de la validación:', $request->validated());
-        return new CommentResource($comment);
-    } */
+  
     public function store(CommentStoreRequest $request, $postId)
     {
         // Asegúrate de que el post_id recibido en la ruta sea válido
@@ -46,6 +35,7 @@ class CommentController extends Controller
         $comment->user_id = auth()->id();
         $post->comments()->save($comment); // Asocia y guarda el comentario en relación al post
         
+        $comment->load('user'); // Asumiendo que quieres asociar el comentario al usuario autenticado
         // Después de guardar el comentario, crea una notificación para el propietario del post
         Notification::create([
             'user_id' => $post->user_id, // El propietario del post recibirá la notificación
@@ -54,8 +44,8 @@ class CommentController extends Controller
             'read' => false,
             'notification_date' => now(),
         ]);
-        
-        $comment->load('user'); // Asumiendo que quieres asociar el comentario al usuario autenticado
+      
+
         return new CommentResource($comment); // Suponiendo que tienes un CommentResource para formatear la salida
     }
     public function show(Request $request, Comment $comment)

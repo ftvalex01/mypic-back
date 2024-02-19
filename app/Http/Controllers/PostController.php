@@ -6,6 +6,7 @@ use App\Http\Requests\PostStoreRequest;
 use App\Http\Requests\PostUpdateRequest;
 use App\Http\Resources\PostCollection;
 use App\Http\Resources\PostResource;
+use App\Models\Hashtag;
 use App\Models\Media;
 use App\Models\Post;
 use Illuminate\Http\Request;
@@ -17,26 +18,30 @@ use Illuminate\Support\Facades\Storage;
 class PostController extends Controller
 {
     public function index(Request $request)
-    {
-        $user = auth()->user();
+{
+    $user = auth()->user();
     
-       /*  // Obtener los IDs de los usuarios que el usuario actual sigue
-        $followingIds = $user->following->pluck('id')->toArray(); */
+    // Obtener los IDs de los usuarios seguidos por el usuario autenticado
+    $followingIds = $user->following()->pluck('users.id')->toArray();
     
-        // Agregar el propio ID del usuario para incluir sus publicaciones
-        $followingIds[] = $user->id;
+    // Agregar el propio ID del usuario para incluir también sus publicaciones
+    $followingIds[] = $user->id;
     
-        // Recuperar publicaciones basadas en la configuración de privacidad
-        $posts = Post::whereHas('user', function ($query) use ($followingIds, $user) {
-            // Incluir publicaciones de usuarios seguidos o de perfiles públicos
-            $query->whereIn('id', $followingIds)->orWhere('is_private', false);
-        })->with(['user', 'media', 'comments', 'reactions'])->paginate(10);
+    // Recuperar publicaciones de los usuarios seguidos
+    $posts = Post::whereIn('user_id', $followingIds)
+                 ->with([
+                    'user', // Cargar información del usuario que publicó
+                    'media',
+                    'comments.user', // Cargar usuarios de cada comentario
+                    'reactions' // Cargar reacciones al post
+                 ])
+                 ->orderByDesc('created_at') // Ordenar las publicaciones por fecha de creación
+                 ->paginate(10); // Paginar los resultados
     
-        return PostResource::collection($posts);
-    }
-    
+    return PostResource::collection($posts);
+}
 
-      
+
     public function store(Request $request)
     {
         // Iniciar transacción de base de datos
@@ -76,7 +81,13 @@ class PostController extends Controller
                     'permanent' => $permanent,
                     'media_id' => $media->id,
                 ]);
-
+                preg_match_all('/#(\w+)/', $request->input('description'), $matches);
+                $hashtags = array_slice($matches[1], 0, 5);
+            
+                foreach ($hashtags as $hashtagName) {
+                    $hashtag = Hashtag::firstOrCreate(['name' => $hashtagName]);
+                    $post->hashtags()->attach($hashtag->id);
+                }
                 DB::commit();
                 return new PostResource($post);
             } else {
@@ -90,14 +101,32 @@ class PostController extends Controller
     }
 
     public function explore(Request $request)
+    {
+        $posts = Post::whereHas('user', function ($query) {
+            $query->where('is_private', false); // Filtra usuarios con perfiles públicos
+        })->with(['user', 'media', 'comments', 'reactions'])->paginate(10); // Ajusta la paginación según necesites
+
+        return PostResource::collection($posts);
+    }
+    public function recommended(Request $request)
 {
-    $posts = Post::whereHas('user', function ($query) {
-        $query->where('is_private', false); // Filtra usuarios con perfiles públicos
-    })->with(['user', 'media', 'comments', 'reactions'])->paginate(10); // Ajusta la paginación según necesites
+    $user = $request->user();
 
-    return PostResource::collection($posts);
+    // Obtener los IDs de los posts que el usuario ha likeado
+    $likedPostIds = $user->reactions()->pluck('reactable_id');
+
+    // Obtener los hashtags de esos posts
+    $likedHashtags = Hashtag::whereHas('posts', function ($query) use ($likedPostIds) {
+        $query->whereIn('id', $likedPostIds);
+    })->pluck('name');
+
+    // Buscar otros posts que contengan esos hashtags
+    $recommendedPosts = Post::whereHas('hashtags', function ($query) use ($likedHashtags) {
+        $query->whereIn('name', $likedHashtags);
+    })->with(['user', 'media', 'comments', 'reactions'])->paginate(10);
+
+    return PostResource::collection($recommendedPosts);
 }
-
     public function show(Request $request, Post $post)
     {
         return new PostResource($post);
@@ -117,16 +146,3 @@ class PostController extends Controller
         return response()->noContent();
     }
 }
-/* // En tu modelo Post
-
-/**
- * Scope a query to only include active posts.
- *
- * @param  \Illuminate\Database\Eloquent\Builder  $query
- * @return \Illuminate\Database\Eloquent\Builder
- */
-/* public function scopeActive($query)
-{
-    return $query->where('publish_date', '>=', now()->subHours(24));
-}
- */ 
