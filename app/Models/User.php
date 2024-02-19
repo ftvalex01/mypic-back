@@ -8,10 +8,16 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Hydrat\Laravel2FA\TwoFactorAuthenticatable;
+use Hydrat\Laravel2FA\Contracts\TwoFactorAuthenticatableContract;
 
-class User extends Authenticatable implements MustVerifyEmail
+
+class User extends Authenticatable implements MustVerifyEmail, TwoFactorAuthenticatableContract
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens,
+        HasFactory,
+        Notifiable,
+        TwoFactorAuthenticatable;
 
     /**
      * The attributes that are mass assignable.
@@ -44,6 +50,8 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $hidden = [
         'password',
         'remember_token',
+        'two_factor_options'
+
     ];
 
     /**
@@ -105,8 +113,7 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->belongsToMany(User::class, 'followers', 'follower_id', 'user_id');
     }
     public function notifications()
-{
-    return $this->hasMany(Notification::class, 'user_id');
-}
-
+    {
+        return $this->hasMany(Notification::class, 'user_id');
+    }
 }

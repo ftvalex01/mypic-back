@@ -22,12 +22,14 @@ return [
     |
     */
 
+
     'policy' => [
-        // 'always',
-        // 'ip',
-        'browser',
-        'geoip',
+        // 'browser',  // first check if we know the browser
+        // 'geoip',    // if so, check if we know the user ip location
+        'always'
+        // if so, no more rules : skip 2FA.
     ],
+
 
 
     /*
@@ -46,7 +48,7 @@ return [
         'policies' => [
             # Can be one of "country", "region", "city", "time_zone".
             'geoip'   => 'country',
-            
+
             # Cookie expiration time in minutes (default 30 days).
             'browser' => 30 * 1440,
         ],
