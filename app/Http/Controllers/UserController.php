@@ -22,6 +22,7 @@ use Illuminate\Validation\ValidationException;
 use App\Events\UserFollowed;
 use App\Mail\TwoFACodeMail;
 use App\Models\Notification;
+use App\Models\UserBlock;
 use Illuminate\Support\Facades\Mail;
 
 class UserController extends Controller
