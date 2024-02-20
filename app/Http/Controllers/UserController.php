@@ -247,8 +247,9 @@ public function updatePrivacy(Request $request, $userId)
 
         return response()->json(['message' => '2FA code sent to your email.', 'requires_2fa_verification' => true]);
     }
-
-    return new UserResource($user);
+  
+        return new UserResource($user);
+    
 }
 public function verify2FA(Request $request)
 {
