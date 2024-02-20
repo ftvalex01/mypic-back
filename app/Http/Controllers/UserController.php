@@ -20,7 +20,9 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Validation\ValidationException;
 use App\Events\UserFollowed;
+use App\Mail\TwoFACodeMail;
 use App\Models\Notification;
+use Illuminate\Support\Facades\Mail;
 
 class UserController extends Controller
 {
@@ -225,28 +227,53 @@ public function updatePrivacy(Request $request, $userId)
     }
 
     public function login(LoginRequest $request)
-    {
-        // Autentica al usuario
-        $request->authenticate();
-    
-        // Regenera la sesión
-        $request->session()->regenerate();
-    
-        // Obtiene el usuario autenticado
-        $user = $request->user();
-    
-        // Verifica si el usuario tiene habilitada la verificación de dos factores
-        if ($user->is_2fa_enabled) {
-            return new UserResource($user);
-            // Si la verificación de dos factores está habilitada, devuelve una respuesta indicando que se requiere la verificación de dos factores
-           /*  return response()->json(['requires_2fa_verification' => true]); */
+{
+    $request->authenticate();
+    $request->session()->regenerate();
+    $user = $request->user();
 
-        }
-    
-        // Si la verificación de dos factores no está habilitada, devuelve una respuesta JSON con los datos del usuario
-        return new UserResource($user);
+    if ($user->is_2fa_enabled) {
+        $token = Str::random(6); // Genera un código de 6 caracteres
+
+        // Enviar el token por correo electrónico al usuario
+        Mail::to($user->email)->send(new TwoFACodeMail($token));
+
+
+        // Guardar el token en la base de datos para su posterior verificación
+        // Asumiendo que tienes una columna `two_fa_code` y `two_fa_expires_at` en tu tabla de usuarios
+        $user->two_fa_code = Hash::make($token);
+        $user->two_fa_expires_at = now()->addMinutes(10); // El código expira en 10 minutos
+        $user->save();
+
+        return response()->json(['message' => '2FA code sent to your email.', 'requires_2fa_verification' => true]);
     }
 
+    return new UserResource($user);
+}
+public function verify2FA(Request $request)
+{
+  
+    $request->validate([
+        'code' => 'required',
+        'email' => 'required|email',
+    ]);
+
+    $user = User::where('email', $request->email)->first();
+
+    if (!$user || !Hash::check($request->code, $user->two_fa_code) || $user->two_fa_expires_at < now()) {
+        return response()->json(['message' => 'El código de verificación es incorrecto o ha expirado.'], 401);
+    }
+
+    // Código correcto, procede a limpiar el código 2FA y fecha de expiración
+    $user->two_fa_code = null;
+    $user->two_fa_expires_at = null;
+    $user->save();
+
+    // Aquí, procede a realizar cualquier otra lógica necesaria post-verificación,
+    // como actualizar el estado de sesión del usuario para indicar que está completamente autenticado.
+
+    return new UserResource($user);
+}
     /**
      * Handle an incoming password reset link request.
      *
