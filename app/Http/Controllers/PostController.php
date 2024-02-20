@@ -18,28 +18,28 @@ use Illuminate\Support\Facades\Storage;
 class PostController extends Controller
 {
     public function index(Request $request)
-{
-    $user = auth()->user();
-    
-    // Obtener los IDs de los usuarios seguidos por el usuario autenticado
-    $followingIds = $user->following()->pluck('users.id')->toArray();
-    
-    // Agregar el propio ID del usuario para incluir también sus publicaciones
-    $followingIds[] = $user->id;
-    
-    // Recuperar publicaciones de los usuarios seguidos
-    $posts = Post::whereIn('user_id', $followingIds)
-                 ->with([
-                    'user', // Cargar información del usuario que publicó
-                    'media',
-                    'comments.user', // Cargar usuarios de cada comentario
-                    'reactions' // Cargar reacciones al post
-                 ])
-                 ->orderByDesc('created_at') // Ordenar las publicaciones por fecha de creación
-                 ->paginate(10); // Paginar los resultados
-    
-    return PostResource::collection($posts);
-}
+    {
+        $user = auth()->user();
+
+        // Obtener los IDs de los usuarios seguidos por el usuario autenticado
+        $followingIds = $user->following()->pluck('users.id')->toArray();
+
+        // Agregar el propio ID del usuario para incluir también sus publicaciones
+        $followingIds[] = $user->id;
+
+        // Recuperar publicaciones de los usuarios seguidos
+        $posts = Post::whereIn('user_id', $followingIds)
+            ->with([
+                'user', // Cargar información del usuario que publicó
+                'media',
+                'comments.user', // Cargar usuarios de cada comentario
+                'reactions' // Cargar reacciones al post
+            ])
+            ->orderByDesc('created_at') // Ordenar las publicaciones por fecha de creación
+            ->paginate(10); // Paginar los resultados
+
+        return PostResource::collection($posts);
+    }
 
 
     public function store(Request $request)
@@ -83,7 +83,7 @@ class PostController extends Controller
                 ]);
                 preg_match_all('/#(\w+)/', $request->input('description'), $matches);
                 $hashtags = array_slice($matches[1], 0, 5);
-            
+
                 foreach ($hashtags as $hashtagName) {
                     $hashtag = Hashtag::firstOrCreate(['name' => $hashtagName]);
                     $post->hashtags()->attach($hashtag->id);
@@ -109,24 +109,26 @@ class PostController extends Controller
         return PostResource::collection($posts);
     }
     public function recommended(Request $request)
-{
-    $user = $request->user();
+    {
+        $user = $request->user();
 
-    // Obtener los IDs de los posts que el usuario ha likeado
-    $likedPostIds = $user->reactions()->pluck('reactable_id');
+        // Obtener los IDs de los posts que el usuario ha likeado
+        $likedPostIds = $user->reactions()->pluck('reactable_id');
 
-    // Obtener los hashtags de esos posts
-    $likedHashtags = Hashtag::whereHas('posts', function ($query) use ($likedPostIds) {
-        $query->whereIn('id', $likedPostIds);
-    })->pluck('name');
+        // Obtener los hashtags de esos posts
+        $likedHashtags = Hashtag::whereHas('posts', function ($query) use ($likedPostIds) {
+            $query->whereIn('id', $likedPostIds);
+        })->pluck('name');
+        Log::info('Liked Post IDs:', $likedPostIds->toArray());
+        Log::info('Liked Hashtags:', $likedHashtags->toArray());
+        // Buscar otros posts que contengan esos hashtags
+        $recommendedPosts = Post::whereHas('hashtags', function ($query) use ($likedHashtags) {
+            $query->whereIn('name', $likedHashtags);
+        })->with(['user', 'media', 'comments', 'reactions'])->paginate(10);
+       
 
-    // Buscar otros posts que contengan esos hashtags
-    $recommendedPosts = Post::whereHas('hashtags', function ($query) use ($likedHashtags) {
-        $query->whereIn('name', $likedHashtags);
-    })->with(['user', 'media', 'comments', 'reactions'])->paginate(10);
-
-    return PostResource::collection($recommendedPosts);
-}
+        return PostResource::collection($recommendedPosts);
+    }
     public function show(Request $request, Post $post)
     {
         return new PostResource($post);

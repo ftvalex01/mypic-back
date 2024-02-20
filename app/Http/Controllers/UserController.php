@@ -30,7 +30,21 @@ class UserController extends Controller
 
     public function index(Request $request)
     {
-        $users = User::all();
+        $user = auth()->user();
+
+        if ($user) {
+            // Obtiene los IDs de usuarios bloqueados y que han bloqueado al usuario actual
+            $blockedUsers = $user->blockedUsers()->pluck('blocked_user_id')->toArray();
+            $blockingUsers = $user->blockingUsers()->pluck('user_id')->toArray();
+            $excludeUsers = array_merge($blockedUsers, $blockingUsers);
+
+            // Filtra a los usuarios bloqueados y que han bloqueado al usuario actual
+            $users = User::whereNotIn('id', $excludeUsers)->get();
+        } else {
+            // Si no hay usuario autenticado, simplemente devuelve todos los usuarios
+            // Considera si esto se ajusta a tus requisitos de seguridad y privacidad
+            $users = User::all();
+        }
 
         return new UserCollection($users);
     }
@@ -247,8 +261,9 @@ public function updatePrivacy(Request $request, $userId)
 
         return response()->json(['message' => '2FA code sent to your email.', 'requires_2fa_verification' => true]);
     }
-
-    return new UserResource($user);
+  
+        return new UserResource($user);
+    
 }
 public function verify2FA(Request $request)
 {
@@ -359,6 +374,86 @@ public function verify2FA(Request $request)
         $user = $request->user();
         return new UserResource($user);
     }
+    public function blockUser(Request $request, $user)
+    {
+        $userId = Auth::id();
+        $blockedUserId = $user;
+
+        // Evitar que un usuario se bloquee a sí mismo
+        if ($userId == $blockedUserId) {
+            return response()->json(['message' => 'No puedes bloquearte a ti mismo.'], 400);
+        }
+
+        // Verificar si el usuario ya está bloqueado
+        $existingBlock = UserBlock::where('user_id', $userId)->where('blocked_user_id', $blockedUserId)->first();
+        if ($existingBlock) {
+            return response()->json(['message' => 'El usuario ya está bloqueado.'], 400);
+        }
+
+        // Crear el bloqueo
+        UserBlock::create([
+            'user_id' => $userId,
+            'blocked_user_id' => $blockedUserId,
+            'block_date' => now(),
+        ]);
+
+        return response()->json(['message' => 'Usuario bloqueado con éxito.']);
+    }
+
+    /**
+     * Desbloquear a un usuario.
+     */
+    public function unblockUser(Request $request, $user)
+    {
+        $userId = Auth::id();
+        $blockedUserId = $user;
+
+        $block = UserBlock::where('user_id', $userId)->where('blocked_user_id', $blockedUserId)->first();
+
+        if (!$block) {
+            return response()->json(['message' => 'El usuario no está bloqueado.'], 400);
+        }
+
+        // Eliminar el bloqueo
+        $block->delete();
+
+        return response()->json(['message' => 'Usuario desbloqueado con éxito.']);
+    }
+    public function checkIfBlocked(Request $request, $user)
+    {
+        $userId = Auth::id(); // Obtener el ID del usuario autenticado
+        $blockedUserId = $user; // El ID del usuario a verificar
+
+        // Buscar un registro de bloqueo existente
+        $isBlocked = UserBlock::where('user_id', $userId)
+            ->where('blocked_user_id', $blockedUserId)
+            ->exists();
+
+        // Devolver el estado de bloqueo
+        return response()->json(['isBlocked' => $isBlocked]);
+    }
+
+    public function toggleBlock(Request $request, $userId)
+    {
+        $userToBlock = User::find($userId);
+        if (!$userToBlock) {
+            return response()->json(['error' => 'User not found'], 404);
+        }
+
+        $currentUser = auth()->user();
+
+        // Verificar si el usuario actual ya ha bloqueado al usuario objetivo
+        if ($currentUser->blockedUsers()->where('blocked_user_id', $userId)->exists()) {
+            // Ya ha bloqueado al usuario, proceder a desbloquear
+            $currentUser->blockedUsers()->detach($userId);
+            return response()->json(['isBlocked' => false]);
+        } else {
+            // Proceder a bloquear al usuario
+            $currentUser->blockedUsers()->attach($userId);
+            return response()->json(['isBlocked' => true]);
+        }
+    }
+
     public function destroy(Request $request): Response
     {
         Auth::guard('web')->logout();

@@ -55,6 +55,7 @@ Route::get('/email/verify/{id}/{hash}', [VerifyEmailController::class, '__invoke
 
 
 Route::get('/explore', [PostController::class, 'explore'])->middleware('auth:sanctum');
+Route::get('/explore/recommended', [PostController::class, 'recommended'])->middleware('auth:sanctum');
 
 Route::middleware('auth:sanctum')->post('/user/{user}', [UserController::class, 'update']);
 
@@ -69,7 +70,10 @@ Route::get('/notifications/unread', [NotificationController::class, 'unreadCount
 Route::patch('/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead']);
 Route::post('/notifications/{notification}/accept', [UserController::class, 'acceptFollowRequest'])->middleware('auth:sanctum');
 Route::post('/notifications/{notification}/reject', [UserController::class, 'rejectFollowRequest'])->middleware('auth:sanctum');
-Route::get('/explore/recommended', [PostController::class, 'recommended'])->middleware('auth:sanctum');
+Route::post('/users/{user}/block', [UserController::class, 'blockUser']);
+Route::delete('/users/{user}/unblock', [UserController::class, 'unblockUser']);
+Route::get('/users/{user}/is-blocked', [UserController::class, 'checkIfBlocked']);
+Route::post('/users/{userId}/toggle-block', [UserController::class, 'toggleBlock']);
 
 Route::post('/verify-2fa', [UserController::class, 'verify2FA'])->middleware('throttle:6,1');
 
