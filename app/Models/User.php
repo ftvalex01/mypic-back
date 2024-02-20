@@ -116,4 +116,14 @@ class User extends Authenticatable implements MustVerifyEmail, TwoFactorAuthenti
     {
         return $this->hasMany(Notification::class, 'user_id');
     }
+
+    public function blockedUsers()
+    {
+        return $this->hasMany(UserBlock::class, 'user_id');
+    }
+
+    public function blockingUsers()
+    {
+        return $this->hasMany(UserBlock::class, 'blocked_user_id');
+    }
 }
