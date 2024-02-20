@@ -71,7 +71,7 @@ Route::post('/notifications/{notification}/accept', [UserController::class, 'acc
 Route::post('/notifications/{notification}/reject', [UserController::class, 'rejectFollowRequest'])->middleware('auth:sanctum');
 Route::get('/explore/recommended', [PostController::class, 'recommended'])->middleware('auth:sanctum');
 
-
+Route::post('/verify-2fa', [UserController::class, 'verify2FA'])->middleware('throttle:6,1');
 
 Route::post('/post/{post}/reactions', [ReactionController::class, 'store'])->middleware('auth:sanctum');
 Route::post('/post/{post}/comments', [CommentController::class, 'store'])->middleware('auth:sanctum');
