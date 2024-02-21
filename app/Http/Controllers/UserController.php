@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\UserBlock;
 use Illuminate\Validation\Rules;
 use App\Http\Requests\UserUpdateRequest;
 use App\Http\Resources\UserCollection;
