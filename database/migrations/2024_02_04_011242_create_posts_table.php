@@ -21,7 +21,6 @@ return new class extends Migration
             $table->timestamp('publish_date')->useCurrent();
             $table->integer('life_time')->default(24);
             $table->boolean('permanent')->default(false);
-            $table->foreignId('media_id')->constrained()->cascadeOnDelete();
             $table->timestamps();
         });
         

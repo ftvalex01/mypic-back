@@ -35,6 +35,9 @@ class CommentController extends Controller
         $comment->user_id = auth()->id();
         $post->comments()->save($comment); // Asocia y guarda el comentario en relación al post
         
+        // Añade tiempo de vida al post
+        $post->increment('life_time', 1); // Por ejemplo, incrementa en 1 unidad el tiempo de vida del post
+
         $comment->load('user'); // Asumiendo que quieres asociar el comentario al usuario autenticado
         // Después de guardar el comentario, crea una notificación para el propietario del post
         Notification::create([
@@ -45,7 +48,7 @@ class CommentController extends Controller
             'notification_date' => now(),
         ]);
       
-
+        
         return new CommentResource($comment); // Suponiendo que tienes un CommentResource para formatear la salida
     }
     public function show(Request $request, Comment $comment)
@@ -61,16 +64,12 @@ class CommentController extends Controller
     }
 // Dentro de App\Http\Controllers\CommentController.php
 
-public function like(Request $request, $postId, $commentId) {
+public function like(Request $request, $post, $commentId) {
     $userId = auth()->id();
+  
+    $comment = Comment::find($commentId);
+    Log::info("Buscando comentario con ID: $commentId");
 
-    // Asegúrate de ajustar esta parte para que funcione con tu estructura polimórfica
-    $comment = Comment::where('id', $commentId)
-                        ->where('commentable_id', $postId)
-                        ->where('commentable_type', Post::class) // Asume que tus comentarios se relacionan con posts de esta manera
-                        ->first();
-                        $likesCount = $comment->reactions()->count();
-                        $isLiked = $comment->reactions()->where('user_id', $userId)->exists();
     if (!$comment) {
         return response()->json(['message' => 'Comment not found'], 404);
     }
@@ -81,25 +80,32 @@ public function like(Request $request, $postId, $commentId) {
     if ($existingReaction) {
         // Si existe, lo elimina (toggle like)
         $existingReaction->delete();
-        $message = 'Like removed from comment';
+        $isLiked = false;
     } else {
         // Si no existe, crea un nuevo like
-        $comment->reactions()->create(['user_id' => $userId]);
-        $message = 'Like added to comment';
+        $comment->reactions()->create([
+            'user_id' => $userId,
+            // Asegúrate de incluir cualquier otro campo requerido por tu tabla de reacciones
+        ]);
+        $isLiked = true;
     }
 
+    // Recalcula el conteo de likes después de añadir/quitar el like
+    $likesCount = $comment->reactions()->count();
+
     return response()->json([
-        'message' => $message,
+        'message' => $isLiked ? 'Like added to comment' : 'Like removed from comment',
         'likesCount' => $likesCount,
         'isLiked' => $isLiked,
     ]);
 }
 
 
+
 // Método destroy simplificado para solo usar $commentId
 public function destroy($commentId) {
     $userId = auth()->id();
-    Log::info('Datos recibidos:', ['commentId' => $commentId]);
+   
 
     $comment = Comment::find($commentId);
 

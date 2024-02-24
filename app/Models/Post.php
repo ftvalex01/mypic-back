@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Post extends Model
 {
@@ -23,7 +24,6 @@ class Post extends Model
         'publish_date',
         'life_time',
         'permanent',
-        'media_id',
     ];
     protected $appends = ['likesCount'];
     /**
@@ -38,11 +38,22 @@ class Post extends Model
     protected static function booted()
     {
         static::deleting(function ($post) {
-            // Asegurarse de eliminar todos los comentarios y reacciones asociadas al post antes de eliminarlo
-            $post->comments()->delete(); // Esto eliminará todos los comentarios relacionados
-            $post->reactions()->delete(); // Esto eliminará todas las reacciones relacionadas
+            // Elimina todos los comentarios relacionados
+            $post->comments()->delete();
+
+            // Elimina todas las reacciones relacionadas
+            $post->reactions()->delete();
+
+            // Si el post tiene media asociada, elimina también esa media
+            if ($post->media) {
+                // Si almacenas la ruta del archivo en la media, puedes descomentar la siguiente línea para eliminar el archivo físico
+                // Storage::delete($post->media->url);
+
+                $post->media->delete();
+            }
         });
     }
+
     public function getLikesCountAttribute()
     {
         // Asumiendo que quieres contar todas las reacciones para este post
@@ -57,9 +68,9 @@ class Post extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function media(): BelongsTo
+    public function media(): HasOne
     {
-        return $this->belongsTo(Media::class);
+        return $this->hasOne(Media::class);
     }
 
     // En tu modelo Post
@@ -81,4 +92,6 @@ public function reactions()
     {
         return $this->hasMany(InteractionHistory::class);
     }
+
+    
 }

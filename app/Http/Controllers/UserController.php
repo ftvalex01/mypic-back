@@ -52,9 +52,9 @@ class UserController extends Controller
 
     public function checkUsernameAvailability($username)
     {   
-        Log::info($username);
+        
         $userExists = User::where('username', $username)->exists();
-        Log::info($userExists);
+       
         if ($userExists) {
             return response()->json(['message' => 'Username is already taken'], Response::HTTP_CONFLICT);
         }
@@ -101,7 +101,7 @@ class UserController extends Controller
         } catch (\Exception $e) {
             // Log de errores y datos
             Log::error('Error durante el registro: ' . $e->getMessage());
-            Log::info('Datos recibidos:', $request->all());
+            
 
             return response()->json(['error' => 'An unexpected error occurred during registration. Please try again.'], 422);
         }
@@ -231,7 +231,7 @@ public function updatePrivacy(Request $request, $userId)
     public function update(UserUpdateRequest $request, User $user)
     {
 
-        Log::info('Datos del Request:', $request->all());
+        
         $user->update($request->validated());
         if ($request->hasFile('profile_picture')) {
             $path = $request->file('profile_picture')->store('profile_pictures', 'public');

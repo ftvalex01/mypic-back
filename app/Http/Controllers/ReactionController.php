@@ -54,6 +54,9 @@ class ReactionController extends Controller
             // Crea la reacción
             $reactable->reactions()->create(['user_id' => $userId]);
 
+            // Añade tiempo de vida al post
+            $reactable->increment('life_time', 1); // Por ejemplo, incrementa en 1 unidad el tiempo de vida del post
+            
             // Crea una notificación para el dueño del post o comentario
             Notification::create([
                 'user_id' => $reactable->user_id, // Asume que tu entidad reactable tiene una relación `user`

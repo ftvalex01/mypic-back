@@ -30,7 +30,7 @@ class MediaController extends Controller
                 // Almacenar el archivo en el disco público y obtener la ruta
                 $path = $request->file('file')->store('uploads', 'public');
                 $url = Storage::url($path);
-    
+
                 // Crear un nuevo registro en la base de datos con la URL del archivo
                 $medium = Media::create([
                     'user_id' => $request->user_id,
@@ -38,17 +38,17 @@ class MediaController extends Controller
                     'url' => $url,
                     'upload_date' => now(), // Aquí usas la URL del archivo almacenado
                 ]);
-    
-                Log::info('Medium creado con éxito', ['id' => $medium->id]);
+
                 
+
                 return new MediumResource($medium);
             } else {
                 return response()->json(['error' => 'No file provided.'], 422);
             }
         } catch (\Exception $e) {
             Log::error('Error durante el registro: ' . $e->getMessage());
-            Log::info('Datos recibidos:', $request->all());
             
+
             return response()->json(['error' => 'Ha ocurrido un error durante el proceso de registro.'], 500);
         }
     }
@@ -71,24 +71,39 @@ class MediaController extends Controller
 
         return response()->noContent();
     }
-    public function getUserImages($userId)
-{
-    $user = User::with('followers')->findOrFail($userId);
-    $requestingUser = auth()->user();
 
-    // Verificar si el perfil es privado
-    if ($user->is_private) {
-        // Si el usuario solicitante no sigue al dueño del perfil y no es el dueño, restringir acceso
-        if (!$user->followers->contains($requestingUser->id) && $user->id != $requestingUser->id) {
-            return response()->json(['message' => 'No autorizado para ver las imágenes.'], 403);
+    public function getUserImages($userId)
+    {
+        $user = User::with('followers')->findOrFail($userId);
+        $requestingUser = auth()->user();
+    
+        if ($user->is_private) {
+            if (!$user->followers->contains($requestingUser->id) && $user->id != $requestingUser->id) {
+                return response()->json(['message' => 'No autorizado para ver las imágenes.'], 403);
+            }
         }
+    
+        $images = $user->media()->where('type', 'photo')->get();
+        $images->load(['post' => function ($query) {
+            $query->select('id', 'user_id', 'description', 'publish_date', 'life_time', 'permanent', 'created_at', 'updated_at');
+            // No incluyas 'likesCount' aquí ya que es un atributo calculado
+        }]);
+    
+        
+    
+        // Clasifica las imágenes en vivas o permanentes según tu lógica
+        $liveImages = $images->filter(function ($image) {
+            return !$image->post || !$image->post->permanent; // Ajusta esta condición según sea necesario
+        });
+    
+        $permanentImages = $images->filter(function ($image) {
+            return $image->post && $image->post->permanent;
+        });
+    
+        return response()->json([
+            'liveImages' => MediumResource::collection($liveImages),
+            'permanentImages' => MediumResource::collection($permanentImages),
+        ]);
     }
 
-    $images = $user->media()->where('type', 'photo')->get();
-
-    return MediumResource::collection($images);
-}
-
-    
-    
 }
