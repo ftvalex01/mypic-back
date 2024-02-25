@@ -11,9 +11,11 @@ use App\Models\Media;
 use App\Models\Post;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+
 
 class PostController extends Controller
 {
@@ -103,8 +105,16 @@ public function postComments(Post $post)
     }
     public function explore(Request $request)
     {
-        $posts = Post::whereHas('user', function ($query) {
-            $query->where('is_private', false); // Filtra usuarios con perfiles públicos
+        $user = Auth::user();
+
+        // Obtén los IDs de los usuarios bloqueados y que han bloqueado al usuario actual
+        $blockedUsers = $user ? $user->blockedUsers()->pluck('blocked_user_id')->toArray() : [];
+        $blockingUsers = $user ? $user->blockingUsers()->pluck('user_id')->toArray() : [];
+        $excludeUsers = array_merge($blockedUsers, $blockingUsers);
+
+        $posts = Post::whereHas('user', function ($query) use ($excludeUsers) {
+            $query->where('is_private', false) // Filtra usuarios con perfiles públicos
+                ->whereNotIn('id', $excludeUsers); // Excluye usuarios bloqueados y que han bloqueado
         })->with(['user', 'media', 'comments', 'reactions'])->paginate(10); // Ajusta la paginación según necesites
 
         return PostResource::collection($posts);
@@ -113,6 +123,11 @@ public function postComments(Post $post)
     {
         $user = $request->user();
 
+        // Obtén los IDs de los usuarios bloqueados y que han bloqueado al usuario actual
+        $blockedUsers = $user->blockedUsers()->pluck('blocked_user_id')->toArray();
+        $blockingUsers = $user->blockingUsers()->pluck('user_id')->toArray();
+        $excludeUsers = array_merge($blockedUsers, $blockingUsers);
+
         // Obtener los IDs de los posts que el usuario ha likeado
         $likedPostIds = $user->reactions()->pluck('reactable_id');
 
@@ -120,15 +135,16 @@ public function postComments(Post $post)
         $likedHashtags = Hashtag::whereHas('posts', function ($query) use ($likedPostIds) {
             $query->whereIn('id', $likedPostIds);
         })->pluck('name');
-        
-        // Buscar otros posts que contengan esos hashtags
+
         $recommendedPosts = Post::whereHas('hashtags', function ($query) use ($likedHashtags) {
             $query->whereIn('name', $likedHashtags);
+        })->whereDoesntHave('user', function ($query) use ($excludeUsers) {
+            $query->whereIn('id', $excludeUsers);
         })->with(['user', 'media', 'comments', 'reactions'])->paginate(10);
-       
 
         return PostResource::collection($recommendedPosts);
     }
+
     public function show(Request $request, Post $post)
     {
         return new PostResource($post);

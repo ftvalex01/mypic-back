@@ -73,6 +73,8 @@ Route::post('/notifications/{notification}/reject', [UserController::class, 'rej
 Route::post('/users/{user}/block', [UserController::class, 'blockUser']);
 Route::delete('/users/{user}/unblock', [UserController::class, 'unblockUser']);
 Route::get('/users/{user}/is-blocked', [UserController::class, 'checkIfBlocked']);
+Route::get('/blocked-users', [UserController::class, 'getBlockedUsers'])->middleware('auth:sanctum');
+
 Route::post('/users/{userId}/toggle-block', [UserController::class, 'toggleBlock']);
 
 Route::post('/verify-2fa', [UserController::class, 'verify2FA'])->middleware('throttle:6,1');
