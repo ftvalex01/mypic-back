@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\UserBlock;
+
 use Illuminate\Validation\Rules;
 use App\Http\Requests\UserUpdateRequest;
 use App\Http\Resources\UserCollection;
@@ -51,7 +51,7 @@ class UserController extends Controller
         return new UserCollection($users);
     }
 
-    public function checkUsernameAvailability($username)
+    public function checkUsernameAvailability($username){
 
         $userExists = User::where('username', $username)->exists();
        
