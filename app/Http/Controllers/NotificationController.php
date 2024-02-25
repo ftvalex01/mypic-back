@@ -46,11 +46,7 @@ class NotificationController extends Controller
 
     public function update(Request $request, Notification $notification)
     {
-        Log::info('Update Notification: ', [
-            'user_id' => $request->user()->id, 
-            'notification_user_id' => $notification->user_id
-        ]);
-    
+        
         // Asegúrate de que el usuario autenticado es el dueño de la notificación
         if ($request->user()->id !== $notification->user_id) {
             Log::info('Unauthorized attempt to update notification', [

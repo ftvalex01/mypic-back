@@ -12,7 +12,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        $schedule->command('posts:reduce-life')->hourly(); 
+        $schedule->command('app:reduce-post-life')->hourly(); 
     }
 
     /**

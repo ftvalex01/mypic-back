@@ -20,88 +20,89 @@ use Illuminate\Support\Facades\Storage;
 class PostController extends Controller
 {
     public function index(Request $request)
-    {
-        $user = auth()->user();
+{
+    $user = auth()->user();
+    // Obtener los IDs de los usuarios seguidos por el usuario autenticado
+    $followingIds = $user->following()->pluck('users.id')->toArray();
 
-        // Obtener los IDs de los usuarios seguidos por el usuario autenticado
-        $followingIds = $user->following()->pluck('users.id')->toArray();
+    // Agregar el propio ID del usuario para incluir también sus publicaciones
+    $followingIds[] = $user->id;
 
-        // Agregar el propio ID del usuario para incluir también sus publicaciones
-        $followingIds[] = $user->id;
-
-        // Recuperar publicaciones de los usuarios seguidos
-        $posts = Post::whereIn('user_id', $followingIds)
-            ->with([
-                'user', // Cargar información del usuario que publicó
-                'media',
-                'comments.user', // Cargar usuarios de cada comentario
-                'reactions' // Cargar reacciones al post
-            ])
-            ->orderByDesc('created_at') // Ordenar las publicaciones por fecha de creación
-            ->paginate(10); // Paginar los resultados
-
-        return PostResource::collection($posts);
-    }
-
+    // Recuperar publicaciones de los usuarios seguidos
+    $posts = Post::whereIn('user_id', $followingIds)
+        ->with([
+            'user', // Cargar información del usuario que publicó
+            'media',
+            'comments.reactions', // Asegúrate de que esto refleje la relación correcta
+            'comments.user', // Cargar usuarios de cada comentario
+            'reactions' // Cargar reacciones al post
+        ])
+        ->orderByDesc('created_at') // Ordenar las publicaciones por fecha de creación
+        ->paginate(10); // Paginar los resultados
+ 
+    return PostResource::collection($posts);
+}
 
     public function store(Request $request)
-    {
-        // Iniciar transacción de base de datos
-        DB::beginTransaction();
-        try {
-            if ($request->hasFile('file')) {
-                // Almacenar el archivo en el sistema de archivos y obtener la URL
-                $path = $request->file('file')->store('uploads', 'public');
-                $url = Storage::url($path);
+{
+    DB::beginTransaction();
+    try {
+        if ($request->hasFile('file')) {
+            // Almacenar el archivo y obtener la URL
+            $path = $request->file('file')->store('uploads', 'public');
+            $url = Storage::url($path);
 
-                // Crear el registro Media
-                $media = Media::create([
-                    'user_id' => $request->user()->id,
-                    'type' => $request->input('type', 'photo'), // O considera validar esto en el request
-                    'url' => $url,
-                    'upload_date' => now(),
-                ]);
+            // Establecer valores predeterminados para life_time y permanent
+            $lifeTime = $request->input('life_time', 24); // Por defecto en horas
+            $permanent = $request->input('permanent', false);
 
-                // Establecer valores predeterminados para life_time y permanent
-                $lifeTime = 24; // Duración de vida por defecto en horas
-                $permanent = false; // No es permanente por defecto
+            // Crear el Post
+            $post = Post::create([
+                'user_id' => $request->user()->id,
+                'description' => $request->input('description'),
+                'publish_date' => now(),
+                'life_time' => $lifeTime,
+                'permanent' => $permanent,
+            ]);
 
-                // Verificar si el usuario desea hacer el post permanente y si tiene pines disponibles
-                if ($request->input('makePermanent') && $request->user()->available_pines > 0) {
-                    $permanent = true;
-                    $lifeTime = null; // O manejar como prefieras para posts permanentes
-                    // Decrementar un pin del usuario
-                    $request->user()->decrement('available_pines');
-                }
+            // Crear el registro Media asociado al Post
+            $media = Media::create([
+                'user_id' => $request->user()->id,
+                'type' => $request->input('type', 'photo'),
+                'url' => $url,
+                'upload_date' => now(),
+                'post_id' => $post->id,
+            ]);
 
-                // Crear el Post
-                $post = Post::create([
-                    'user_id' => $request->user()->id,
-                    'description' => $request->input('description'),
-                    'publish_date' => now(),
-                    'life_time' => $lifeTime,
-                    'permanent' => $permanent,
-                    'media_id' => $media->id,
-                ]);
-                preg_match_all('/#(\w+)/', $request->input('description'), $matches);
-                $hashtags = array_slice($matches[1], 0, 5);
-
-                foreach ($hashtags as $hashtagName) {
-                    $hashtag = Hashtag::firstOrCreate(['name' => $hashtagName]);
-                    $post->hashtags()->attach($hashtag->id);
-                }
-                DB::commit();
-                return new PostResource($post);
-            } else {
-                return response()->json(['error' => 'Archivo no proporcionado.'], 422);
+            // Procesamiento de hashtags (si es aplicable)
+            preg_match_all('/#(\w+)/', $request->input('description'), $matches);
+            $hashtags = array_slice($matches[1], 0, 5);
+            foreach ($hashtags as $hashtagName) {
+                $hashtag = Hashtag::firstOrCreate(['name' => $hashtagName]);
+                $post->hashtags()->attach($hashtag->id);
             }
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Error durante la creación del post: ' . $e->getMessage());
-            return response()->json(['error' => 'Ha ocurrido un error durante el proceso de creación del post.'], 500);
-        }
-    }
 
+            DB::commit();
+            
+            return new PostResource(Post::with(['user', 'media', 'reactions'])->find($post->id));
+
+        } else {
+            return response()->json(['error' => 'Archivo no proporcionado.'], 422);
+        }
+    } catch (\Exception $e) {
+        DB::rollBack();
+        Log::error('Error durante la creación del post: ' . $e->getMessage());
+        return response()->json(['error' => 'Ha ocurrido un error durante el proceso de creación del post.'], 500);
+    }
+}
+
+public function postComments(Post $post)
+    {
+        // Asegúrate de tener una relación de comentarios en tu modelo Post
+        $comments = $post->comments()->with('user')->get();
+
+        return response()->json($comments);
+    }
     public function explore(Request $request)
     {
         $user = Auth::user();
@@ -135,7 +136,6 @@ class PostController extends Controller
             $query->whereIn('id', $likedPostIds);
         })->pluck('name');
 
-        // Buscar otros posts que contengan esos hashtags excluyendo posts de usuarios bloqueados
         $recommendedPosts = Post::whereHas('hashtags', function ($query) use ($likedHashtags) {
             $query->whereIn('name', $likedHashtags);
         })->whereDoesntHave('user', function ($query) use ($excludeUsers) {
@@ -157,10 +157,31 @@ class PostController extends Controller
         return new PostResource($post);
     }
 
-    public function destroy(Request $request, Post $post): Response
+    public function destroy(Post $post)
     {
+        
+
         $post->delete();
 
         return response()->noContent();
     }
+
+    public function pin(Request $request, Post $post)
+    {
+        $user = auth()->user();
+
+        if ($user->available_pines > 0) {
+            // Actualiza el post para hacerlo permanente
+            $post->update(['permanent' => true]);
+            $user->decrement('available_pines');
+            $post->load('media');
+          
+            
+            return new PostResource($post);
+        } else {
+            return response()->json(['error' => 'No tienes pines disponibles.'], 403);
+        }
+    }
+    
+
 }

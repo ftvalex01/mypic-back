@@ -21,6 +21,7 @@ class Media extends Model
         'type',
         'url',
         'upload_date',
+        'post_id',
     ];
 
     /**
@@ -41,6 +42,6 @@ class Media extends Model
 
     public function post(): BelongsTo
     {
-        return $this->belongsTo(Post::class);
+        return $this->belongsTo(Post::class,'post_id');
     }
 }

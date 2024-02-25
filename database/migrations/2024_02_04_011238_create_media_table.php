@@ -15,10 +15,11 @@ return new class extends Migration
 
         Schema::create('media', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->nullable(false)->constrained()->onDelete('cascade');
-            $table->enum('type', ["photo","video"]);
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->enum('type', ["photo", "video"]);
             $table->text('url');
             $table->timestamp('upload_date');
+            $table->foreignId('post_id')->nullable()->constrained('posts')->onDelete('set null'); // Agregar esto
             $table->timestamps();
         });
 
