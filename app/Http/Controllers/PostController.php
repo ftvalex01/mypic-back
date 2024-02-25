@@ -94,7 +94,13 @@ class PostController extends Controller
     }
 }
 
+public function postComments(Post $post)
+    {
+        // Asegúrate de tener una relación de comentarios en tu modelo Post
+        $comments = $post->comments()->with('user')->get();
 
+        return response()->json($comments);
+    }
     public function explore(Request $request)
     {
         $posts = Post::whereHas('user', function ($query) {

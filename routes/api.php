@@ -90,7 +90,7 @@ Route::middleware('auth:sanctum')->get('/users', [UserController::class, 'index'
 // Agrega esta línea en routes/api.php dentro del grupo de middleware 'auth:sanctum'
 
 
-
+Route::get('/profile/posts/{post}/comments', [PostController::class, 'postComments']);
 
 
 Route::patch('/notifications/{notification}', [NotificationController::class, 'update']);
