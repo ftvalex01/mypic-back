@@ -106,6 +106,20 @@ class UserController extends Controller
             return response()->json(['error' => 'An unexpected error occurred during registration. Please try again.'], 422);
         }
     }
+
+    public function checkEmailUnique(Request $request)
+    {
+        Log::info($request->all());
+        $request->validate(['email' => 'required|email']);
+    
+        $emailExists = User::where('email', $request->email)->exists();
+    
+        if ($emailExists) {
+            return response()->json(['message' => 'El correo electrónico ya está registrado.']);
+        }
+    
+        return response()->json(['message' => 'El correo electrónico está disponible.'], 200);
+    }
     public function toggleFollow(Request $request, $userId)
     {
         $userToFollow = User::find($userId);

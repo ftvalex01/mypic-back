@@ -52,7 +52,7 @@ Route::get('/email/verify/{id}/{hash}', [VerifyEmailController::class, '__invoke
      ->middleware(['auth:sanctum', 'signed'])
      ->name('verification.verify');
 
-
+Route::get('/check-email', [UserController::class, 'checkEmailUnique']);
 
 Route::get('/explore', [PostController::class, 'explore'])->middleware('auth:sanctum');
 Route::get('/explore/recommended', [PostController::class, 'recommended'])->middleware('auth:sanctum');
