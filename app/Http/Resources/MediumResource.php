@@ -19,7 +19,7 @@ class MediumResource extends JsonResource
             'url' => $this->url,
             'upload_date' => $this->upload_date,
             'user' => UserResource::make($this->whenLoaded('user')),
-            'posts' => PostCollection::make($this->whenLoaded('posts')),
+            'post' => new PostResource($this->whenLoaded('post')),
         ];
     }
 }

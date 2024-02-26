@@ -15,10 +15,12 @@ return new class extends Migration
 
         Schema::create('reactions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->morphs('reactable');
+            $table->unsignedBigInteger('reactable_id');
+            $table->string('reactable_type');
+            $table->unsignedBigInteger('user_id');
             $table->timestamps();
         });
+        
         
 
         Schema::enableForeignKeyConstraints();

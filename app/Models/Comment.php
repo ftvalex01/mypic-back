@@ -19,8 +19,9 @@ class Comment extends Model
      */
     protected $fillable = [
         'user_id',
+        'post_id', // Asegúrate de que este campo exista si no estás utilizando relaciones polimórficas.
         'text',
-        'comment_date',
+        // 'comment_date' si decides manejarlo automáticamente o permitir su asignación masiva.
     ];
 
     /**
@@ -41,9 +42,14 @@ class Comment extends Model
     {
         return $this->morphTo();
     }
+    // En tu modelo Comment
+public function reactions()
+{
+    return $this->morphMany(Reaction::class, 'reactable');
+}
 
-    public function reactions(): HasMany
+   /*  public function reactions(): HasMany
     {
         return $this->hasMany(Reaction::class);
-    }
+    } */
 }

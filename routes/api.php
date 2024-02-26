@@ -2,6 +2,11 @@
 
 use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 use App\Http\Controllers\Auth\VerifyEmailController;
+use App\Http\Controllers\CommentController;
+use App\Http\Controllers\MediaController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\PostController;
+use App\Http\Controllers\ReactionController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
@@ -22,6 +27,10 @@ Route::middleware('auth:sanctum')->group(function () {
      Route::get('/user', [UserController::class, 'profile']);
      Route::post('/logout', [UserController::class, 'destroy']);
 });
+Route::get('/check-username/{username}', [UserController::class, 'checkUsernameAvailability']);
+
+Route::get('/user/{username}', [UserController::class, 'getUserByUsername']);
+//Route::middleware('auth:sanctum')->get('/user/{username}', [UserController::class, 'getUserByUsername']);
 Route::post('login', [UserController::class, 'login']);
 Route::post('register', [UserController::class, 'store']);
 
@@ -45,19 +54,49 @@ Route::get('/email/verify/{id}/{hash}', [VerifyEmailController::class, '__invoke
 
 
 
+Route::get('/explore', [PostController::class, 'explore'])->middleware('auth:sanctum');
+Route::get('/explore/recommended', [PostController::class, 'recommended'])->middleware('auth:sanctum');
 
 Route::middleware('auth:sanctum')->post('/user/{user}', [UserController::class, 'update']);
 
-Route::middleware('auth:sanctum')->get('/user/{username}', [UserController::class, 'getUserByUsername']);
+Route::middleware('auth:sanctum')->get('/user/{user}/images', [MediaController::class, 'getUserImages']);
 
+Route::post('/user/{user}/follow', [UserController::class, 'toggleFollow'])->middleware('auth:sanctum');
+
+Route::get('/user/follows', [UserController::class, 'follows']);
+
+Route::get('/user/{userId}/follow-data', [UserController::class, 'followData'])->middleware('auth:sanctum');
+Route::get('/notifications/unread', [NotificationController::class, 'unreadCount']);
+Route::patch('/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead']);
+Route::post('/notifications/{notification}/accept', [UserController::class, 'acceptFollowRequest'])->middleware('auth:sanctum');
+Route::post('/notifications/{notification}/reject', [UserController::class, 'rejectFollowRequest'])->middleware('auth:sanctum');
+Route::post('/users/{user}/block', [UserController::class, 'blockUser']);
+Route::delete('/users/{user}/unblock', [UserController::class, 'unblockUser']);
+Route::get('/users/{user}/is-blocked', [UserController::class, 'checkIfBlocked']);
+Route::get('/blocked-users', [UserController::class, 'getBlockedUsers'])->middleware('auth:sanctum');
+Route::get('/profile/posts/{post}/comments', [PostController::class, 'postComments']);
+
+Route::post('/users/{userId}/toggle-block', [UserController::class, 'toggleBlock']);
+
+Route::post('/verify-2fa', [UserController::class, 'verify2FA'])->middleware('throttle:6,1');
+
+Route::post('/post/{post}/reactions', [ReactionController::class, 'store'])->middleware('auth:sanctum');
+Route::post('/post/{post}/comments', [CommentController::class, 'store'])->middleware('auth:sanctum');
+// Dentro de routes/api.php
+Route::post('/posts/{post}/comments/{comment}/likes', [CommentController::class, 'like']);
+Route::middleware('auth:sanctum')->get('/notifications', [\App\Http\Controllers\NotificationController::class, 'index']);
+Route::delete('/comments/{comment}', [CommentController::class, 'destroy']);
+
+Route::middleware('auth:sanctum')->patch('/user/{user}/privacy', [UserController::class, 'updatePrivacy']);
 
 Route::middleware('auth:sanctum')->get('/users', [UserController::class, 'index']);
+// Agrega esta línea en routes/api.php dentro del grupo de middleware 'auth:sanctum'
 
 
-Route::apiResource('user-follower', App\Http\Controllers\UserFollowerController::class);
 
-Route::apiResource('user-following', App\Http\Controllers\UserFollowingController::class);
 
+
+Route::patch('/notifications/{notification}', [NotificationController::class, 'update']);
 
 
 Route::apiResource('comment', App\Http\Controllers\CommentController::class);
@@ -72,7 +111,7 @@ Route::apiResource('view', App\Http\Controllers\ViewController::class);
 
 Route::apiResource('message', App\Http\Controllers\MessageController::class);
 
-Route::apiResource('notification', App\Http\Controllers\NotificationController::class);
+
 
 Route::apiResource('album', App\Http\Controllers\AlbumController::class);
 

@@ -8,10 +8,16 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Hydrat\Laravel2FA\TwoFactorAuthenticatable;
+use Hydrat\Laravel2FA\Contracts\TwoFactorAuthenticatableContract;
 
-class User extends Authenticatable implements MustVerifyEmail
+
+class User extends Authenticatable implements MustVerifyEmail, TwoFactorAuthenticatableContract
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens,
+        HasFactory,
+        Notifiable,
+        TwoFactorAuthenticatable;
 
     /**
      * The attributes that are mass assignable.
@@ -30,6 +36,10 @@ class User extends Authenticatable implements MustVerifyEmail
         'available_pines',
         'profile_picture',
         'accumulated_points',
+        'is_private',
+        'is_2fa_enabled', // Asegúrate de que este campo esté incluido
+        'google_id',
+
     ];
 
     /**
@@ -40,6 +50,8 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $hidden = [
         'password',
         'remember_token',
+        'two_factor_options'
+
     ];
 
     /**
@@ -49,11 +61,11 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     protected $casts = [
         'birth_date' => 'date',
-        'register_date' => 'timestamp', 
+        'register_date' => 'timestamp',
         'email_verified_at' => 'timestamp',
     ];
 
-  
+
 
     public function posts(): HasMany
     {
@@ -70,18 +82,48 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Reaction::class);
     }
 
-    public function userFollowers(): HasMany
-    {
-        return $this->hasMany(UserFollower::class);
-    }
+    // public function userFollowers(): HasMany
+    // {
+    //     return $this->hasMany(UserFollower::class);
+    // }
 
-    public function userFollowings(): HasMany
-    {
-        return $this->hasMany(UserFollowing::class);
-    }
+    // public function userFollowings(): HasMany
+    // {
+    //     return $this->hasMany(UserFollowing::class);
+    // }
 
     public function purchases(): HasMany
     {
         return $this->hasMany(Purchase::class);
+    }
+    public function media(): HasMany
+    {
+        return $this->hasMany(Media::class);
+    }
+    public function followers()
+    {
+        // Esta relación asume que hay una tabla 'user_followers' con columnas 'user_id' y 'follower_id'
+        // 'follower_id' es el ID del usuario que sigue, 'user_id' es el ID del usuario que es seguido
+        return $this->belongsToMany(User::class, 'followers', 'user_id', 'follower_id');
+    }
+
+    public function following()
+    {
+        // La inversa de la relación anterior
+        return $this->belongsToMany(User::class, 'followers', 'follower_id', 'user_id');
+    }
+    public function notifications()
+    {
+        return $this->hasMany(Notification::class, 'user_id');
+    }
+
+    public function blockedUsers()
+    {
+        return $this->hasMany(UserBlock::class, 'user_id');
+    }
+
+    public function blockingUsers()
+    {
+        return $this->hasMany(UserBlock::class, 'blocked_user_id');
     }
 }

@@ -2,10 +2,17 @@
 
 namespace App\Providers;
 
+use App\Events\CommentPosted;
+use App\Events\PostReacted;
+use App\Events\UserFollowed;
+use App\Listeners\SendCommentPostedNotification;
+use App\Listeners\SendPostReactionNotification;
+use App\Listeners\SendUserFollowedNotification;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
+
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
-use Illuminate\Support\Facades\Event;
+
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -18,6 +25,15 @@ class EventServiceProvider extends ServiceProvider
         Registered::class => [
             SendEmailVerificationNotification::class,
         ],
+        PostReacted::class => [
+            SendPostReactionNotification::class,
+        ],
+        UserFollowed::class => [
+            SendUserFollowedNotification::class,
+        ],
+        CommentPosted::class => [
+            SendCommentPostedNotification::class,
+        ],
     ];
 
     /**
@@ -25,7 +41,7 @@ class EventServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        parent::boot();
     }
 
     /**
