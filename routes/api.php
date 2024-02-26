@@ -24,11 +24,11 @@ use Illuminate\Http\Request;
 */
 
 Route::middleware('auth:sanctum')->group(function () {
-      Route::get('/user', [UserController::class, 'profile']); 
+     Route::get('/user', [UserController::class, 'profile']);
      Route::post('/logout', [UserController::class, 'destroy']);
 });
 Route::get('/check-username/{username}', [UserController::class, 'checkUsernameAvailability']);
-Route::patch('/post/{post}/pin', [PostController::class, 'pin']);
+
 Route::get('/user/{username}', [UserController::class, 'getUserByUsername']);
 //Route::middleware('auth:sanctum')->get('/user/{username}', [UserController::class, 'getUserByUsername']);
 Route::post('login', [UserController::class, 'login']);
@@ -52,7 +52,7 @@ Route::get('/email/verify/{id}/{hash}', [VerifyEmailController::class, '__invoke
      ->middleware(['auth:sanctum', 'signed'])
      ->name('verification.verify');
 
-Route::get('/check-email', [UserController::class, 'checkEmailUnique']);
+
 
 Route::get('/explore', [PostController::class, 'explore'])->middleware('auth:sanctum');
 Route::get('/explore/recommended', [PostController::class, 'recommended'])->middleware('auth:sanctum');
@@ -74,6 +74,7 @@ Route::post('/users/{user}/block', [UserController::class, 'blockUser']);
 Route::delete('/users/{user}/unblock', [UserController::class, 'unblockUser']);
 Route::get('/users/{user}/is-blocked', [UserController::class, 'checkIfBlocked']);
 Route::get('/blocked-users', [UserController::class, 'getBlockedUsers'])->middleware('auth:sanctum');
+Route::get('/profile/posts/{post}/comments', [PostController::class, 'postComments']);
 
 Route::post('/users/{userId}/toggle-block', [UserController::class, 'toggleBlock']);
 
@@ -92,7 +93,7 @@ Route::middleware('auth:sanctum')->get('/users', [UserController::class, 'index'
 // Agrega esta línea en routes/api.php dentro del grupo de middleware 'auth:sanctum'
 
 
-Route::get('/profile/posts/{post}/comments', [PostController::class, 'postComments']);
+
 
 
 Route::patch('/notifications/{notification}', [NotificationController::class, 'update']);
