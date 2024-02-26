@@ -92,6 +92,7 @@ Route::middleware('auth:sanctum')->patch('/user/{user}/privacy', [UserController
 Route::middleware('auth:sanctum')->get('/users', [UserController::class, 'index']);
 // Agrega esta línea en routes/api.php dentro del grupo de middleware 'auth:sanctum'
 
+Route::get('/check-email', [UserController::class, 'checkEmailUnique']);
 
 
 
