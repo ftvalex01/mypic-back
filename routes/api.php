@@ -77,7 +77,7 @@ Route::get('/blocked-users', [UserController::class, 'getBlockedUsers'])->middle
 Route::get('/profile/posts/{post}/comments', [PostController::class, 'postComments']);
 
 Route::post('/users/{userId}/toggle-block', [UserController::class, 'toggleBlock']);
-
+Route::get('/check-email', [UserController::class, 'checkEmailUnique']);
 Route::post('/verify-2fa', [UserController::class, 'verify2FA'])->middleware('throttle:6,1');
 
 Route::post('/post/{post}/reactions', [ReactionController::class, 'store'])->middleware('auth:sanctum');
