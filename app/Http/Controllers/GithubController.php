@@ -41,7 +41,7 @@ class GithubController extends Controller
 
         Auth::login($user);
 
-        return redirect('https://lucasreact.informaticamajada.es/');
+        return redirect('http://localhost:5173/');
     }
 
     protected function generateUsernameFromEmail($email)
